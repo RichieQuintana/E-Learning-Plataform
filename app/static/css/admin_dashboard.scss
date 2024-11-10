@@ -1,126 +1,349 @@
-// admin_dashboard.scss
-
 // Variables
 $primary-color: #4a90e2;
-$secondary-color: #f5f6fa;
-$success-color: #2ecc71;
-$warning-color: #f1c40f;
-$danger-color: #e74c3c;
-$text-dark: #2c3e50;
+$secondary-color: #5c6bc0;
+$success-color: #66bb6a;
+$warning-color: #ffa726;
+$danger-color: #ef5350;
+$text-color: #333333;
 $text-light: #ffffff;
-$shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+$text-muted: #757575;
+$border-color: #e0e0e0;
+$sidebar-width: 250px;
+$header-height: 60px;
+$border-radius: 8px;
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-// Dashboard layout
-.admin-dashboard {
-  padding: 2rem;
+// Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Reset y estilos base
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f6fa;
+  color: $text-color;
+}
+
+// Layout principal
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+// Sidebar
+.sidebar {
+  width: $sidebar-width;
+  background: linear-gradient(to bottom, $primary-color, $secondary-color);
+  color: $text-light;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
   
-  .dashboard-header {
+  &-header {
+    @include flex-center;
+    padding: 1rem 0;
     margin-bottom: 2rem;
-    h1 {
-      color: $text-dark;
-      font-size: 2rem;
-      font-weight: 600;
-    }
-  }
-
-  .stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: $text-light;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: $shadow;
-    transition: transform 0.2s;
-
-    &:hover {
-      transform: translateY(-5px);
-    }
-
-    .stat-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      
-      &.users { color: $primary-color; }
-      &.courses { color: $success-color; }
-      &.instructors { color: $warning-color; }
-      &.students { color: $danger-color; }
-    }
-
-    .stat-title {
-      color: $text-dark;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-
-    .stat-value {
-      color: $text-dark;
-      font-size: 2rem;
-      font-weight: 600;
-    }
-  }
-
-  .recent-activity {
-    background: $text-light;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: $shadow;
-
-    h2 {
-      color: $text-dark;
+    
+    i {
       font-size: 1.5rem;
-      margin-bottom: 1rem;
+      margin-right: 0.5rem;
     }
-
-    .activity-list {
-      .activity-item {
-        padding: 1rem;
-        border-bottom: 1px solid $secondary-color;
+    
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+  
+  &-menu {
+    list-style: none;
+    flex: 1;
+    
+    li {
+      margin-bottom: 0.5rem;
+      
+      a {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        color: rgba($text-light, 0.8);
+        text-decoration: none;
+        border-radius: $border-radius;
+        transition: all 0.3s ease;
         
-        &:last-child {
-          border-bottom: none;
+        i {
+          margin-right: 0.8rem;
+          font-size: 1.1rem;
         }
-
-        .activity-title {
-          color: $text-dark;
-          font-weight: 500;
+        
+        &:hover {
+          background-color: rgba($text-light, 0.1);
+          color: $text-light;
         }
-
-        .activity-time {
-          color: lighten($text-dark, 30%);
-          font-size: 0.875rem;
-        }
+      }
+    }
+  }
+  
+  &-footer {
+    padding-top: 1rem;
+    border-top: 1px solid rgba($text-light, 0.1);
+    
+    .logout-btn {
+      @include flex-center;
+      width: 100%;
+      padding: 0.8rem;
+      color: $text-light;
+      text-decoration: none;
+      border-radius: $border-radius;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: rgba($danger-color, 0.2);
+      }
+      
+      i {
+        margin-right: 0.5rem;
       }
     }
   }
 }
 
-// Quick actions section
-.quick-actions {
-  margin-top: 2rem;
+// Main Content
+.main-content {
+  flex: 1;
+  padding: 1rem;
+}
+
+// Top Bar
+.top-bar {
+  @include flex-between;
+  background-color: $text-light;
+  padding: 1rem;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  margin-bottom: 2rem;
   
-  .action-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-
-    .action-button {
-      background: $primary-color;
-      color: $text-light;
-      padding: 1rem;
-      border-radius: 8px;
-      text-align: center;
-      text-decoration: none;
-      transition: background-color 0.2s;
-
-      &:hover {
-        background: darken($primary-color, 10%);
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f5f6fa;
+    padding: 0.5rem 1rem;
+    border-radius: $border-radius;
+    width: 300px;
+    
+    i {
+      color: $text-muted;
+      margin-right: 0.5rem;
+    }
+    
+    input {
+      border: none;
+      background: none;
+      outline: none;
+      width: 100%;
+      
+      &::placeholder {
+        color: $text-muted;
       }
     }
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    i {
+      font-size: 1.2rem;
+      color: $text-muted;
+      cursor: pointer;
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+    
+    span {
+      font-weight: 500;
+    }
+  }
+}
+
+// Dashboard Content
+.dashboard-content {
+  h1 {
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    color: $text-color;
+  }
+}
+
+// Stats Cards
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: $text-light;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  display: flex;
+  align-items: center;
+  
+  i {
+    font-size: 2rem;
+    margin-right: 1rem;
+    padding: 1rem;
+    border-radius: 50%;
+    
+    &.fa-users { 
+      color: $primary-color;
+      background-color: rgba($primary-color, 0.1);
+    }
+    
+    &.fa-graduation-cap {
+      color: $success-color;
+      background-color: rgba($success-color, 0.1);
+    }
+    
+    &.fa-chart-line {
+      color: $warning-color;
+      background-color: rgba($warning-color, 0.1);
+    }
+  }
+  
+  .stat-info {
+    h3 {
+      font-size: 0.9rem;
+      color: $text-muted;
+      margin-bottom: 0.3rem;
+    }
+    
+    p {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-color;
+    }
+  }
+}
+
+// Recent Activity
+.recent-activity {
+  background-color: $text-light;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  
+  h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+  }
+}
+
+.activity-list {
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid $border-color;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    i {
+      font-size: 1.2rem;
+      padding: 0.8rem;
+      border-radius: 50%;
+      margin-right: 1rem;
+      
+      &.fa-user-plus {
+        color: $success-color;
+        background-color: rgba($success-color, 0.1);
+      }
+      
+      &.fa-book {
+        color: $primary-color;
+        background-color: rgba($primary-color, 0.1);
+      }
+    }
+    
+    .activity-info {
+      p {
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+      }
+      
+      span {
+        font-size: 0.8rem;
+        color: $text-muted;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+    padding: 1rem 0.5rem;
+    
+    &-header {
+      h2 {
+        display: none;
+      }
+    }
+    
+    &-menu {
+      li a span {
+        display: none;
+      }
+    }
+    
+    &-footer {
+      .logout-btn span {
+        display: none;
+      }
+    }
+  }
+  
+  .top-bar {
+    .search-bar {
+      width: 200px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .top-bar {
+    flex-direction: column;
+    gap: 1rem;
+    
+    .search-bar {
+      width: 100%;
+    }
+  }
+  
+  .stats-cards {
+    grid-template-columns: 1fr;
   }
 }
