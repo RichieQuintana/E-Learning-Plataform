@@ -22,5 +22,6 @@ Base de Datos: SQLite / PostgreSQL / SQLAlchemy
 __Se utilizo en el SASS__
 Flexbox: Se utiliza con display: flex; 
 Permite crear diseños flexibles. Las propiedades clave son flex-direction, justify-content, align-items, entre otras.
+
 CSS Grid: Se utiliza con display: grid; 
 Define un sistema de filas y columnas. Las propiedades clave son grid-template-columns, grid-template-rows, grid-gap, etc.
