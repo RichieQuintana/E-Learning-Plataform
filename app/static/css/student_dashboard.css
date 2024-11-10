@@ -1,0 +1,41 @@
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #f5f6fa;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+h1 {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+a {
+  display: inline-block;
+  background-color: #4a90e2;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+a:hover {
+  background-color: rgb(34.3857142857, 117.3857142857, 214.6142857143);
+}
+a:not(:last-child) {
+  margin-right: 15px;
+}
+
+a[href*=logout] {
+  background-color: #e74c3c;
+}
+a[href*=logout]:hover {
+  background-color: rgb(213.698630137, 43.8356164384, 26.301369863);
+}
+
+/*# sourceMappingURL=student_dashboard.css.map */

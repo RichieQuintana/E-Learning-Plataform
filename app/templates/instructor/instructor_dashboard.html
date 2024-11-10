@@ -3,6 +3,8 @@
 <p>Total: {{ courses|length }}</p>
 
 <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instructor_dashboard.css') }}">
+
 
 {% if courses %}
     <ul>

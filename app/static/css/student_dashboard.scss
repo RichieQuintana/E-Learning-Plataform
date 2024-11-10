@@ -1,0 +1,56 @@
+// Variables
+$primary-color: #4a90e2;
+$secondary-color: #f5f6fa;
+$success-color: #2ecc71;
+$warning-color: #f1c40f;
+$danger-color: #e74c3c;
+$text-dark: #2c3e50;
+$text-light: #ffffff;
+$shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+// Estilo general del cuerpo
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: $secondary-color;
+  color: $text-dark;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+// Encabezado principal
+h1 {
+  color: $text-dark;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+// Enlaces de acción (Ver Cursos y Cerrar sesión)
+a {
+  display: inline-block;
+  background-color: $primary-color;
+  color: $text-light;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+
+  &:not(:last-child) {
+    margin-right: 15px;
+  }
+}
+
+// Botón de "Cerrar sesión"
+a[href*="logout"] {
+  background-color: $danger-color;
+
+  &:hover {
+    background-color: darken($danger-color, 10%);
+  }
+}

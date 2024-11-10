@@ -1,0 +1,92 @@
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-family: "Arial", sans-serif;
+  color: #3498db;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+table {
+  width: 80%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+table thead {
+  background-color: #3498db;
+  color: white;
+}
+table thead th {
+  padding: 12px;
+  text-align: left;
+  font-size: 16px;
+}
+table tbody tr {
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+}
+table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+table tbody tr td {
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+table tbody tr .btn {
+  padding: 6px 12px;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+table tbody tr .btn.btn-info {
+  background-color: #3498db;
+}
+table tbody tr .btn.btn-info:hover {
+  background-color: rgb(33.1380753138, 125.1882845188, 186.8619246862);
+}
+table tbody tr .btn.back {
+  background-color: #2ecc71;
+  margin-top: 20px;
+  display: inline-block;
+  text-align: center;
+}
+table tbody tr .btn.back:hover {
+  background-color: rgb(36.616, 162.384, 89.948);
+}
+
+tbody tr td[colspan="3"] {
+  text-align: center;
+  padding: 20px;
+  color: #e74c3c;
+}
+
+.btn.back {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.btn.back:hover {
+  background-color: #0056b3;
+}
+
+/*# sourceMappingURL=manage_courses.css.map */

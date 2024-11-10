@@ -9,7 +9,6 @@ from models import db, User, Role, Course
 from functools import wraps
 from flask_assets import Environment, Bundle
 
-
 # Configuración de la aplicación
 app = Flask(__name__, template_folder="app/templates", static_folder="app/static")
 app.config.from_object(Config)
@@ -38,7 +37,6 @@ def role_required(role):
     return decorator
 
 # Crear rol y usuario administrador inicial
-# Crear rol y usuario administrador inicial
 with app.app_context():
     db.create_all()  # Crear tablas en la base de datos si no existen
 
@@ -55,15 +53,12 @@ with app.app_context():
     admin_role = Role.query.filter_by(name='admin').first()
     admin_user = User.query.filter_by(username='admin').first()
     
-    # Asegurarse de que se crea un usuario administrador con el rol adecuado
     if not admin_user and admin_role:
         password_hash = bcrypt.generate_password_hash('admin123').decode('utf-8')
         admin_user = User(username='admin', password=password_hash, role=admin_role)
         db.session.add(admin_user)
         db.session.commit()
         print("Usuario administrador creado con éxito. Usuario: 'admin', Contraseña: 'admin123'")
-
-
 
 # Rutas del Administrador
 @app.route('/admin/dashboard')
@@ -72,12 +67,14 @@ with app.app_context():
 def admin_dashboard():
     return render_template('admin/admin_dashboard.html')
 
-@app.route('/admin/manage_courses')
+@app.route('/admin/manage_courses', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')
 def manage_courses():
-    # Lógica para gestionar cursos
-    return render_template('admin/manage_courses.html')
+    # Obtener todos los cursos
+    courses = Course.query.all()
+    return render_template('admin/manage_courses.html', courses=courses)
+
 
 @app.route('/admin/register_user', methods=['GET', 'POST'])
 @login_required
@@ -99,92 +96,78 @@ def register_user():
     roles = Role.query.all()
     return render_template('admin/register_user.html', roles=roles)
 
+@app.route('/admin/view_course/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def view_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    
+    # Si el método es POST, se ejecuta la eliminación
+    if request.method == 'POST':
+        db.session.delete(course)
+        db.session.commit()
+        flash('Curso eliminado exitosamente.', 'success')
+        return redirect(url_for('manage_courses'))
+    
+    # Para método GET, solo se muestra la vista del curso
+    return render_template('admin/view_course.html', course=course)
+
 # Rutas del Instructor
-# Ruta para el dashboard del instructor
 @app.route('/instructor/dashboard')
 @login_required
 @role_required('instructor')
 def instructor_dashboard():
-    # Obtener todos los cursos del instructor actual
     courses = Course.query.filter_by(instructor_id=current_user.id).all()
     return render_template('instructor/instructor_dashboard.html', courses=courses)
 
-# Ruta para crear un curso
 @app.route('/instructor/create_course', methods=['GET', 'POST'])
 @login_required
 @role_required('instructor')
 def create_course():
     if request.method == 'POST':
-        # Obtener datos del formulario
         title = request.form.get('title')
         description = request.form.get('description')
-
-        # Crear el nuevo curso
         new_course = Course(
             title=title,
             description=description,
             instructor_id=current_user.id
         )
-        
-        # Guardar el curso en la base de datos
         db.session.add(new_course)
         db.session.commit()
-
         flash('Curso creado exitosamente.', 'success')
         return redirect(url_for('instructor_dashboard'))
-    
     return render_template('instructor/create_course.html')
 
-# Ruta para editar un curso
 @app.route('/instructor/edit_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('instructor')
 def edit_course(course_id):
-    # Obtener el curso
     course = Course.query.get_or_404(course_id)
-    
-    # Verificar que el curso pertenece al instructor actual
     if course.instructor_id != current_user.id:
         abort(403)
-    
     if request.method == 'POST':
-        # Actualizar los datos del curso
         course.title = request.form.get('title')
         course.description = request.form.get('description')
-
-        # Guardar cambios en la base de datos
         db.session.commit()
-        
         flash('Curso actualizado exitosamente.', 'success')
         return redirect(url_for('instructor_dashboard'))
-    
     return render_template('instructor/edit_course.html', course=course)
 
-# Ruta para gestionar un curso (visualización, eliminar, etc.)
 @app.route('/instructor/manage_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('instructor')
 def manage_course(course_id):
-    # Obtener el curso
     course = Course.query.get_or_404(course_id)
-
-    # Verificar que el curso pertenece al instructor actual
     if course.instructor_id != current_user.id:
         abort(403)
-    
     if request.method == 'POST':
-        # Si el instructor decide eliminar el curso
         db.session.delete(course)
         db.session.commit()
-        
         flash('Curso eliminado exitosamente.', 'success')
         return redirect(url_for('instructor_dashboard'))
-    
-    # Aquí podrías añadir lógica adicional, como obtener estudiantes inscritos u otros datos del curso
     return render_template('instructor/manage_course.html', course=course)
 
 # Rutas del Estudiante
-
 @app.route('/student/dashboard')
 @login_required
 @role_required('student')
@@ -200,19 +183,16 @@ def view_courses():
     return render_template('student/view_courses.html', courses=courses)
 
 # Ruta de inicio de sesión
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username and password:  # Verifica que ambos campos estén presentes
+        if username and password:
             user = User.query.filter_by(username=username).first()
             if user and bcrypt.check_password_hash(user.password, password):
                 login_user(user)
                 flash('Inicio de sesión exitoso', 'success')
-
-                # Redirecciona al dashboard correcto en función del rol del usuario
                 if user.role.name == 'admin':
                     return redirect(url_for('admin_dashboard'))
                 elif user.role.name == 'instructor':
@@ -229,7 +209,6 @@ def login():
     return render_template('login.html')
 
 # Ruta de cierre de sesión
-
 @app.route('/logout')
 @login_required
 def logout():
