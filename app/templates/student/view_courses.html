@@ -1,0 +1,21 @@
+<!-- app/templates/student/view_courses.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ver Cursos</title>
+</head>
+<body>
+    <h1>Cursos Disponibles</h1>
+    <ul>
+        {% for course in courses %}
+        <li>
+            <strong>{{ course.title }}</strong> - {{ course.description }}
+            <br>
+            Instructor: {{ course.instructor.username }}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('student_dashboard') }}">Volver al Inicio</a>
+</body>
+</html>

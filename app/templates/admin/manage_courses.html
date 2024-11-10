@@ -1,0 +1,37 @@
+<!-- app/templates/admin/manage_courses.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar Cursos</title>
+</head>
+<body>
+    <h1>Gestionar Cursos</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Instructor</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{ course.title }}</td>
+                <td>{{ course.description }}</td>
+                <td>{{ course.instructor.username }}</td>
+                <td>
+                    <a href="{{ url_for('edit_course', course_id=course.id) }}">Editar</a>
+                    <form method="POST" action="{{ url_for('delete_course', course_id=course.id) }}" style="display:inline;">
+                        <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar este curso?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('admin_dashboard') }}">Volver al Inicio</a>
+</body>
+</html>

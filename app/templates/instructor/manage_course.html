@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar Curso</title>
+</head>
+<body>
+    <h1>Gestionar Curso: {{ course.title }}</h1>
+    <p>Descripción: {{ course.description }}</p>
+
+    <!-- Puedes agregar secciones para gestionar el curso, como ver alumnos inscritos o eliminar el curso -->
+    <h2>Estudiantes Inscritos</h2>
+    {% if course.students %}
+        <ul>
+            {% for student in course.students %}
+                <li>{{ student.username }} - {{ student.email }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay estudiantes inscritos aún.</p>
+    {% endif %}
+
+    <!-- Botón para eliminar el curso -->
+    <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
+        <button type="submit">Eliminar Curso</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('instructor_dashboard') }}">Volver al Inicio</a>
+</body>
+</html>

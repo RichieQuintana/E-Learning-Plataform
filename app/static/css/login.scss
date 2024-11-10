@@ -1,0 +1,125 @@
+// Variables
+$primary-color: #0056b3;
+$secondary-color: #4CAF50;
+$background-color: #f5f5f5;
+$text-color: #333;
+$input-border-color: #ddd;
+$input-focus-color: #0056b3;
+$white: #fff;
+
+// Mixins
+@mixin input-styles {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid $input-border-color;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    
+    &:focus {
+        outline: none;
+        border-color: $input-focus-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    }
+}
+
+// Reset y estilos base
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+// Estilos principales
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: $background-color;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: $white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    h1 {
+        color: $text-color;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        .form-group {
+            width: 100%;
+
+            input {
+                @include input-styles;
+            }
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: $primary-color;
+            color: $white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+
+            &:active {
+                transform: translateY(1px);
+            }
+        }
+    }
+}
+
+// Media queries para responsividad
+@media (max-width: 480px) {
+    .login-container {
+        padding: 20px;
+        
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+    }
+}
+
+// Estilos adicionales para mejorar la accesibilidad
+input::placeholder {
+    color: #999;
+}
+
+// Asegura que el contenedor no toque los bordes en pantallas pequeñas
+@media (max-height: 600px) {
+    body {
+        align-items: flex-start;
+        padding-top: 40px;
+    }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-tools"></i>
+                <h2>Panel Admin</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active">
+                    <a href="#dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('register_user') }}">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrar Usuario</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('manage_courses') }}">
+                        <i class="fas fa-book"></i>
+                        <span>Gestionar Cursos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#estadisticas">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Estadísticas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#configuracion">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar...">
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <h1>Bienvenido al Panel de Administración</h1>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="stat-info">
+                            <h3>Usuarios Totales</h3>
+                            <p>1,234</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div class="stat-info">
+                            <h3>Cursos Activos</h3>
+                            <p>42</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="stat-info">
+                            <h3>Ingresos Mensuales</h3>
+                            <p>€15,678</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-certificate"></i>
+                        <div class="stat-info">
+                            <h3>Certificaciones</h3>
+                            <p>567</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h2>Actividad Reciente</h2>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <i class="fas fa-user-plus"></i>
+                            <div class="activity-info">
+                                <p>Nuevo usuario registrado</p>
+                                <span>Hace 5 minutos</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-book"></i>
+                            <div class="activity-info">
+                                <p>Nuevo curso añadido</p>
+                                <span>Hace 2 horas</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-certificate"></i>
+                            <div class="activity-info">
+                                <p>Certificación completada</p>
+                                <span>Hace 3 horas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

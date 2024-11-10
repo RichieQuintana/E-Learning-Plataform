@@ -1,0 +1,126 @@
+// admin_dashboard.scss
+
+// Variables
+$primary-color: #4a90e2;
+$secondary-color: #f5f6fa;
+$success-color: #2ecc71;
+$warning-color: #f1c40f;
+$danger-color: #e74c3c;
+$text-dark: #2c3e50;
+$text-light: #ffffff;
+$shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+// Dashboard layout
+.admin-dashboard {
+  padding: 2rem;
+  
+  .dashboard-header {
+    margin-bottom: 2rem;
+    h1 {
+      color: $text-dark;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+  }
+
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: $text-light;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: $shadow;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      
+      &.users { color: $primary-color; }
+      &.courses { color: $success-color; }
+      &.instructors { color: $warning-color; }
+      &.students { color: $danger-color; }
+    }
+
+    .stat-title {
+      color: $text-dark;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      color: $text-dark;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+  }
+
+  .recent-activity {
+    background: $text-light;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: $shadow;
+
+    h2 {
+      color: $text-dark;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .activity-list {
+      .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid $secondary-color;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .activity-title {
+          color: $text-dark;
+          font-weight: 500;
+        }
+
+        .activity-time {
+          color: lighten($text-dark, 30%);
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+}
+
+// Quick actions section
+.quick-actions {
+  margin-top: 2rem;
+  
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+
+    .action-button {
+      background: $primary-color;
+      color: $text-light;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background: darken($primary-color, 10%);
+      }
+    }
+  }
+}
