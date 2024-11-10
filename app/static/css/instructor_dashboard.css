@@ -57,7 +57,7 @@ ul li a {
   transition: background-color 0.3s ease;
 }
 ul li a:hover {
-  background-color: rgb(34.3857142857, 117.3857142857, 214.6142857143);
+  background-color: #2275d7;
 }
 ul li a:not(:last-child) {
   margin-right: 10px;
@@ -74,7 +74,7 @@ a {
   transition: background-color 0.3s ease;
 }
 a:hover {
-  background-color: rgb(36.616, 162.384, 89.948);
+  background-color: #25a25a;
 }
 
 a[href*=logout] {
@@ -88,7 +88,5 @@ a[href*=logout] {
   transition: background-color 0.3s ease;
 }
 a[href*=logout]:hover {
-  background-color: rgb(213.698630137, 43.8356164384, 26.301369863);
-}
-
-/*# sourceMappingURL=instructor_dashboard.css.map */
+  background-color: #d62c1a;
+}/*# sourceMappingURL=instructor_dashboard.css.map */

@@ -69,7 +69,7 @@ body {
   transition: background-color 0.3s ease;
 }
 .login-container form button:hover {
-  background-color: rgb(0, 61.4972067039, 128);
+  background-color: #003d80;
 }
 .login-container form button:active {
   transform: translateY(1px);
@@ -84,6 +84,9 @@ body {
     margin-bottom: 20px;
   }
 }
+input::-moz-placeholder {
+  color: #999;
+}
 input::placeholder {
   color: #999;
 }
@@ -93,6 +96,4 @@ input::placeholder {
     align-items: flex-start;
     padding-top: 40px;
   }
-}
-
-/*# sourceMappingURL=login.css.map */
+}/*# sourceMappingURL=login.css.map */

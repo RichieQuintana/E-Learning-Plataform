@@ -25,7 +25,7 @@ a {
   transition: background-color 0.3s ease;
 }
 a:hover {
-  background-color: rgb(34.3857142857, 117.3857142857, 214.6142857143);
+  background-color: #2275d7;
 }
 a:not(:last-child) {
   margin-right: 15px;
@@ -35,7 +35,5 @@ a[href*=logout] {
   background-color: #e74c3c;
 }
 a[href*=logout]:hover {
-  background-color: rgb(213.698630137, 43.8356164384, 26.301369863);
-}
-
-/*# sourceMappingURL=student_dashboard.css.map */
+  background-color: #d62c1a;
+}/*# sourceMappingURL=student_dashboard.css.map */

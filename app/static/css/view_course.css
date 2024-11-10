@@ -1,3 +1,70 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
 
+h1 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
-/*# sourceMappingURL=view_course.css.map */
+div {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+}
+div h2 {
+  font-size: 1.5em;
+  color: #555;
+  margin: 10px 0;
+}
+div p {
+  font-size: 1em;
+  color: #666;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn.btn-secondary {
+  background-color: #007bff;
+  color: white;
+  margin-right: 10px;
+}
+.btn.btn-secondary:hover {
+  background-color: #0056b3;
+}
+.btn.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+.btn.btn-danger:hover {
+  background-color: #c82333;
+}
+.btn.btn-danger i {
+  margin-right: 5px;
+}
+
+form {
+  display: inline;
+}/*# sourceMappingURL=view_course.css.map */
