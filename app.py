@@ -183,7 +183,7 @@ def view_courses():
     return render_template('student/view_courses.html', courses=courses)
 
 # Ruta de inicio de sesión
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
