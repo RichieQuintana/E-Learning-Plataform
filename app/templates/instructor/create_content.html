@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Contenido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Nuevo Contenido</h1>
+        <form method="post" class="content-form">
+            <div class="form-group">
+                <label for="title">Título</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Tipo</label>
+                <select id="type" name="type" required>
+                    <option value="video">Video</option>
+                    <option value="text">Texto</option>
+                    <option value="quiz">Quiz</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="content">Contenido</label>
+                <textarea id="content" name="content" rows="5" required></textarea>
+            </div>
+            <input type="hidden" name="module_id" value="{{ module_id }}">
+            <button type="submit" class="submit-button">Crear Contenido</button>
+        </form>
+        <a href="{{ url_for('manage_course', course_id=course_id) }}" class="back-button">Volver al Curso</a>
+    </div>
+</body>
+</html>

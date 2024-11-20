@@ -1,13 +1,15 @@
 # app/app.py
 from flask import Flask, render_template, redirect, url_for, request, flash, abort
 from config import Config
-from flask_sqlalchemy import SQLAlchemy
+
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
-from models import db, User, Role, Course
+from models import db, User, Role, Course, Module, ContentItem, CourseEnrollment, StudentResponse
 from functools import wraps
-from flask_assets import Environment, Bundle
+from datetime import datetime
+import json
+
 
 # Configuración de la aplicación
 app = Flask(__name__, template_folder="app/templates", static_folder="app/static")
@@ -167,6 +169,77 @@ def manage_course(course_id):
         return redirect(url_for('instructor_dashboard'))
     return render_template('instructor/manage_course.html', course=course)
 
+@app.route('/instructor/create_module/<int:course_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('instructor')
+def create_module(course_id):
+    course = Course.query.get_or_404(course_id)
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        new_module = Module(title=title, order=len(course.modules) + 1, course_id=course_id)
+        db.session.add(new_module)
+        db.session.commit()
+        flash('Módulo creado exitosamente.', 'success')
+        return redirect(url_for('manage_course', course_id=course_id))
+    
+    return render_template('instructor/create_module.html', course=course)
+
+@app.route('/instructor/create_content/<int:course_id>/<int:module_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('instructor')
+def create_content(course_id, module_id):
+
+    module = Module.query.get_or_404(module_id)
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content_type = request.form.get('type')
+        content = request.form.get('content')
+        new_content = ContentItem(
+            title=title, 
+            type=content_type, 
+            content=content,
+            order=len(module.content_items) + 1,
+            module_id=module_id
+        )
+        db.session.add(new_content)
+        db.session.commit()
+        flash('Contenido creado exitosamente.', 'success')
+        return redirect(url_for('manage_course', course_id=course_id))
+    
+    return render_template('instructor/create_content.html', course_id=course_id, module_id=module_id)
+
+@app.route('/instructor/edit_content/<int:content_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('instructor')
+def edit_content(content_id):
+    content_item = ContentItem.query.get_or_404(content_id)
+    course_id = content_item.module.course_id
+    
+    if request.method == 'POST':
+        content_item.title = request.form.get('title')
+        content_item.type = request.form.get('type')
+        content_item.content = request.form.get('content')
+        db.session.commit()
+        flash('Contenido actualizado exitosamente.', 'success')
+        return redirect(url_for('manage_course', course_id=course_id))
+    
+    return render_template('instructor/edit_content.html', 
+                           content_item=content_item)
+
+@app.route('/instructor/delete_content', methods=['POST'])
+@login_required
+@role_required('instructor')
+def delete_content():
+    content_id = request.form.get('content_id')
+    content_item = ContentItem.query.get_or_404(content_id)
+    course_id = content_item.module.course_id
+    db.session.delete(content_item)
+    db.session.commit()
+    flash('Contenido eliminado exitosamente.', 'success')
+    return redirect(url_for('manage_course', course_id=course_id))
+
 # Rutas del Estudiante
 @app.route('/student/dashboard')
 @login_required
@@ -180,7 +253,112 @@ def student_dashboard():
 @role_required('student')
 def view_courses():
     courses = Course.query.all()
-    return render_template('student/view_courses.html', courses=courses)
+    # Obtener todas las inscripciones del estudiante actual
+    enrollments = {
+        enrollment.course_id: enrollment 
+        for enrollment in CourseEnrollment.query.filter_by(student_id=current_user.id).all()
+    }
+    return render_template('student/view_courses.html', 
+                         courses=courses, 
+                         enrollments=enrollments)
+
+@app.route('/student/enroll/<int:course_id>', methods=['POST'])
+@login_required
+@role_required('student')
+def enroll_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    existing_enrollment = CourseEnrollment.query.filter_by(
+        student_id=current_user.id,
+        course_id=course_id
+    ).first()
+    
+    if existing_enrollment:
+        flash('Ya estás inscrito en este curso.', 'info')
+    else:
+        enrollment = CourseEnrollment(student_id=current_user.id, course_id=course_id)
+        db.session.add(enrollment)
+        db.session.commit()
+        flash('Te has inscrito exitosamente en el curso.', 'success')
+    
+    return redirect(url_for('view_course_content', course_id=course_id))
+
+@app.route('/student/course/<int:course_id>')
+@login_required
+@role_required('student')
+def view_course_content(course_id):
+    course = Course.query.get_or_404(course_id)
+    enrollment = CourseEnrollment.query.filter_by(
+        student_id=current_user.id,
+        course_id=course_id
+    ).first()
+    
+    if not enrollment:
+        flash('Debes inscribirte primero en este curso.', 'warning')
+        return redirect(url_for('view_courses'))
+    
+    return render_template('student/course_content.html', 
+                         course=course, 
+                         enrollment=enrollment)
+
+@app.route('/student/content/<int:content_id>', methods=['GET', 'POST'])
+@login_required
+@role_required('student')
+def view_content(content_id):
+    content_item = ContentItem.query.get_or_404(content_id)
+    
+    if request.method == 'POST' and content_item.type == 'quiz':
+        response_data = request.form.to_dict()
+        
+        # Crear o actualizar la respuesta del estudiante
+        student_response = StudentResponse.query.filter_by(
+            student_id=current_user.id,
+            content_item_id=content_id
+        ).first()
+        
+        if not student_response:
+            student_response = StudentResponse(
+                student_id=current_user.id,
+                content_item_id=content_id,
+                response=json.dumps(response_data),
+                completed=True,
+                completion_date=datetime.utcnow()
+            )
+            db.session.add(student_response)
+        else:
+            student_response.response = json.dumps(response_data)
+            student_response.completion_date = datetime.utcnow()
+        
+        db.session.commit()
+        update_course_progress(current_user.id, content_item.module.course_id)
+        flash('Respuestas guardadas exitosamente.', 'success')
+        
+    return render_template('student/content_view.html', 
+                         content_item=content_item,
+                         student_response=StudentResponse.query.filter_by(
+                             student_id=current_user.id,
+                             content_item_id=content_id
+                         ).first())
+
+def update_course_progress(student_id, course_id):
+    enrollment = CourseEnrollment.query.filter_by(
+        student_id=student_id,
+        course_id=course_id
+    ).first()
+    
+    if enrollment:
+        course = Course.query.get(course_id)
+        total_items = sum(len(module.content_items) for module in course.modules)
+        completed_items = StudentResponse.query.join(ContentItem)\
+            .join(Module)\
+            .filter(
+                Module.course_id == course_id,
+                StudentResponse.student_id == student_id,
+                StudentResponse.completed == True
+            ).count()
+        
+        enrollment.progress = (completed_items / total_items * 100) if total_items > 0 else 0
+        enrollment.completed = enrollment.progress >= 100
+        db.session.commit()
 
 # Ruta de inicio de sesión
 @app.route('/', methods=['GET', 'POST'])

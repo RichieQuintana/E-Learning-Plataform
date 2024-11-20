@@ -1,0 +1,61 @@
+<!-- app/templates/student/content_view.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ content_item.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ content_item.title }}</h1>
+        
+        {% if content_item.type == 'video' %}
+        <div class="video-container">
+            <iframe src="{{ content_item.content }}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+        
+        {% elif content_item.type == 'text' %}
+        <div class="text-content">
+            {{ content_item.content|safe }}
+        </div>
+        
+        {% elif content_item.type == 'quiz' %}
+        <form method="post" class="quiz-form">
+            {% set quiz_data = content_item.content|from_json %}
+            {% for question in quiz_data.questions %}
+            <div class="question">
+                <h3>{{ question.question }}</h3>
+                {% if question.type == 'multiple_choice' %}
+                    {% for option in question.options %}
+                    <label class="option">
+                        <input type="radio" 
+                               name="question_{{ loop.parent.loop.index }}" 
+                               value="{{ option }}"
+                               {% if student_response and option in student_response.response|from_json %}checked{% endif %}
+                               {% if student_response %}disabled{% endif %}>
+                        {{ option }}
+                    </label>
+                    {% endfor %}
+                {% elif question.type == 'text' %}
+                    <textarea name="question_{{ loop.index }}"
+                              {% if student_response %}disabled{% endif %}>{{ student_response.response|from_json|default('', true) }}</textarea>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            {% if not student_response %}
+            <button type="submit" class="submit-button">Enviar Respuestas</button>
+            {% endif %}
+        </form>
+        {% endif %}
+        
+        <a href="{{ url_for('view_course_content', course_id=content_item.module.course_id) }}" 
+           class="back-button">Volver al Curso</a>
+    </div>
+</body>
+</html>

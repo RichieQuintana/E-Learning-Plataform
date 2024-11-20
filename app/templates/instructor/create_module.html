@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Módulo</title>
+    <!-- Puedes agregar enlaces a tus archivos CSS y frameworks si es necesario -->
+</head>
+<body>
+    <h1>Crear Módulo para el Curso: {{ course.title }}</h1>
+    <p>{{ course.description }}</p>
+
+    <form action="{{ url_for('create_module', course_id=course.id) }}" method="POST">
+        <div>
+            <label for="title">Título del Módulo:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <button type="submit">Crear Módulo</button>
+    </form>
+
+    <a href="{{ url_for('manage_course', course_id=course.id) }}">Volver a la Gestión del Curso</a>
+</body>
+</html>

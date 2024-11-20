@@ -1,32 +1,47 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Gestionar Curso</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/instructor_manage.css') }}">
 
 </head>
 <body>
     <h1>Gestionar Curso: {{ course.title }}</h1>
-    <p>Descripción: {{ course.description }}</p>
+    <p>{{ course.description }}</p>
 
-    <!-- Puedes agregar secciones para gestionar el curso, como ver alumnos inscritos o eliminar el curso -->
-    <h2>Estudiantes Inscritos</h2>
-    {% if course.students %}
+    <h2>Módulos del Curso</h2>
+    {% if course.modules %}
         <ul>
-            {% for student in course.students %}
-                <li>{{ student.username }} - {{ student.email }}</li>
+            {% for module in course.modules %}
+                <li>
+                    <strong>{{ module.title }}</strong>
+                    <ul>
+                        {% for content in module.content_items %}
+                            <li>
+                                <p><strong>{{ content.title }}</strong> - Tipo: {{ content.type }}</p>
+                                <a href="{{ url_for('edit_content', content_id=content.id) }}">Editar</a>
+                                <form action="{{ url_for('delete_content') }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="content_id" value="{{ content.id }}">
+                                    <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este contenido?');">Eliminar</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ url_for('create_content', course_id=course.id, module_id=module.id) }}">Añadir Contenido</a>
+                </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No hay estudiantes inscritos aún.</p>
+        <p>No hay módulos en este curso.</p>
     {% endif %}
+    
+    <a href="{{ url_for('create_module', course_id=course.id) }}">Crear Módulo</a>
 
-    <!-- Botón para eliminar el curso -->
-    <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
-        <button type="submit">Eliminar Curso</button>
+    <form action="{{ url_for('manage_course', course_id=course.id) }}" method="POST">
+        <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este curso?');">Eliminar Curso</button>
     </form>
 
-    <br>
-    <a href="{{ url_for('instructor_dashboard') }}">Volver al Inicio</a>
+    <a href="{{ url_for('instructor_dashboard') }}">Volver al Dashboard</a>
 </body>
 </html>

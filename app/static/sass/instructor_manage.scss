@@ -1,0 +1,181 @@
+// Variables de color y estilo
+$primary-color: #3498db;
+$secondary-color: #ecf0f1;
+$success-color: #2ecc71;
+$warning-color: #f39c12;
+$danger-color: #e74c3c;
+$text-dark: #2c3e50;
+$text-light: #ffffff;
+$shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+// Contenedor principal
+body {
+  font-family: Arial, sans-serif;
+  background-color: $secondary-color;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: $text-dark;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100vh;
+}
+
+// Título principal
+h1 {
+  font-size: 3rem;
+  color: $primary-color;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+// Descripción del curso
+p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+// Sección de módulos del curso
+h2 {
+  font-size: 2rem;
+  color: $text-dark;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+// Lista de módulos
+ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  li {
+    background-color: $text-light;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    & > strong {
+      font-size: 1.25rem;
+      color: $primary-color;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 1rem;
+      
+      li {
+        margin-bottom: 1rem;
+      }
+    }
+  }
+}
+
+// Enlaces y botones
+a {
+  font-size: 1.5rem;  // Aumenta el tamaño de la fuente
+  display: inline-block; // Para que el enlace ocupe más espacio, se comporta como un bloque
+  border-radius: 8px; // Opcional: bordes redondeados para una apariencia más suave
+  color: $primary-color;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  padding: auto;
+
+  &:hover {
+    color: darken($primary-color, 10%);
+  }
+}
+
+
+button {
+  background-color: $danger-color;
+  color: $text-light;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: darken($danger-color, 10%);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Botón de confirmación para eliminar curso
+button[type="submit"] {
+  background-color: $danger-color;
+  color: $text-light;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: darken($danger-color, 15%);
+  }
+}
+
+// Botón para volver al Dashboard
+a.back-button {
+  display: inline-block;
+  background-color: $primary-color;
+  color: $text-light;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 2rem;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+// Formulario de eliminación de curso
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+// Botón de añadir contenido
+a.add-content-button {
+  display: inline-block;
+  background-color: $success-color;
+  color: $text-light;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 2rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: darken($success-color, 10%);
+  }
+}

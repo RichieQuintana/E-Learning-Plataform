@@ -1,0 +1,108 @@
+// Variables
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$danger-color: #dc3545;
+$success-color: #28a745;
+$text-dark: #343a40;
+$text-light: #f8f9fa;
+$border-color: #dee2e6;
+$shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+// Estilos generales
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: $text-light;
+  color: $text-dark;
+  margin: 0;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: $shadow;
+  padding: 2rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+  }
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+
+  &.button-primary {
+    background-color: $primary-color;
+    color: $text-light;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+
+  &.button-secondary {
+    background-color: $secondary-color;
+    color: $text-light;
+
+    &:hover {
+      background-color: darken($secondary-color, 10%);
+    }
+  }
+
+  &.button-danger {
+    background-color: $danger-color;
+    color: $text-light;
+
+    &:hover {
+      background-color: darken($danger-color, 10%);
+    }
+  }
+}
+
+.course-list {
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    background-color: #fff;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    box-shadow: $shadow;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .course-info {
+      flex-grow: 1;
+      margin-right: 1.5rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+}

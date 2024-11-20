@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Contenido - {{ content_item.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Contenido</h1>
+        <form method="post" class="content-form">
+            <div class="form-group">
+                <label for="title">Título</label>
+                <input type="text" id="title" name="title" value="{{ content_item.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Tipo</label>
+                <select id="type" name="type" required>
+                    <option value="video" {% if content_item.type == 'video' %}selected{% endif %}>Video</option>
+                    <option value="text" {% if content_item.type == 'text' %}selected{% endif %}>Texto</option>
+                    <option value="quiz" {% if content_item.type == 'quiz' %}selected{% endif %}>Quiz</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="content">Contenido</label>
+                {% if content_item.type == 'video' %}
+                    <input type="text" id="content" name="content" value="{{ content_item.content }}" required>
+                {% elif content_item.type == 'text' %}
+                    <textarea id="content" name="content" rows="5" required>{{ content_item.content }}</textarea>
+                {% elif content_item.type == 'quiz' %}
+                    <textarea id="content" name="content" rows="5" required>{{ content_item.content }}</textarea>
+                {% endif %}
+            </div>
+            <button type="submit" class="submit-button">Guardar Cambios</button>
+        </form>
+        <a href="{{ url_for('manage_course', course_id=content_item.module.course_id) }}" class="back-button">Volver al Curso</a>
+    </div>
+</body>
+</html>
