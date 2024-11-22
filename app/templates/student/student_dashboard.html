@@ -4,12 +4,23 @@
     <meta charset="UTF-8">
     <title>Panel del Estudiante</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/student_dashboard.css') }}">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <!-- Cargando Font Awesome -->
 </head>
 <body>
     <h1>Bienvenido estudiante {{ current_user.username }}</h1>
 
-    <a href="{{ url_for('view_courses') }}">Ver Cursos Disponibles</a><br>
-    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+    <nav>
+        <a href="{{ url_for('view_courses') }}"><i class="fa fa-book"></i> Ver Cursos Disponibles</a>
+        <a href="{{ url_for('profile') }}"><i class="fa fa-user"></i> Mi Perfil</a>
+        <a style="margin-left: auto;" href="{{ url_for('logout') }}"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
+    </nav>
+
+    <div class="content">
+        <h2>Información adicional o enlaces relacionados a tu panel de estudiante</h2>
+        <ul>
+            <li><i class="fa fa-certificate"></i> Cursos completados</li>
+            <li><i class="fa fa-trophy"></i> Logros alcanzados</li>
+        </ul>
+    </div>
 </body>
 </html>

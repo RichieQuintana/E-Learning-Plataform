@@ -1,56 +1,67 @@
-// Variables
-$primary-color: #4a90e2;
-$secondary-color: #f5f6fa;
-$success-color: #2ecc71;
-$warning-color: #f1c40f;
-$danger-color: #e74c3c;
-$text-dark: #2c3e50;
-$text-light: #ffffff;
-$shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+// Variables para los colores
+$primary-color: #0073e6;
+$secondary-color: #f4f4f4;
+$text-color: #333;
 
-// Estilo general del cuerpo
+// Estilos Generales
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: $secondary-color;
-  color: $text-dark;
-  margin: 0;
-  padding: 0;
-  text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: $secondary-color;
+    margin: 0;
+    padding: 0;
 }
 
-// Encabezado principal
+// Estilos del Header
 h1 {
-  color: $text-dark;
-  font-size: 2rem;
-  font-weight: 600;
-  margin-top: 2rem;
+    text-align: center;
+    color: $primary-color;
 }
 
-// Enlaces de acción (Ver Cursos y Cerrar sesión)
-a {
-  display: inline-block;
-  background-color: $primary-color;
-  color: $text-light;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  border-radius: 8px;
-  margin-top: 1rem;
-  transition: background-color 0.3s ease;
-  
-  &:hover {
-    background-color: darken($primary-color, 10%);
-  }
+// Navegación
+nav {
+    display: flex;
+    background-color: $primary-color;
+    color: white;
+    padding: 10px;
+    justify-content: space-between;
 
-  &:not(:last-child) {
-    margin-right: 15px;
-  }
+    a {
+        color: white;
+        text-decoration: none;
+        margin: 0 10px;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 }
 
-// Botón de "Cerrar sesión"
-a[href*="logout"] {
-  background-color: $danger-color;
+// Icono
+.icon {
+    margin-right: 5px;
+}
 
-  &:hover {
-    background-color: darken($danger-color, 10%);
-  }
+// Contenido del Dashboard
+ul {
+    list-style-type: none;
+    padding: 0;
+    li {
+        font-size: 18px;
+        margin: 10px 0;
+        i {
+            margin-right: 8px;
+        }
+    }
+}
+
+// Estilos de botones
+.button {
+    display: inline-block;
+    padding: 10px 15px;
+    color: white;
+    background-color: $primary-color;
+    border-radius: 5px;
+    text-decoration: none;
+    &:hover {
+        background-color: darken($primary-color, 10%);
+    }
 }

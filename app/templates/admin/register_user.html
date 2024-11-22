@@ -1,9 +1,9 @@
-<!-- templates/admin/register_user.html -->
 <h2>Registrar Usuario</h2>
 <form method="POST" action="{{ url_for('register_user') }}">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <select name="role">
+    <input type="text" name="username" placeholder="Nombre de Usuario" required>
+    <input type="email" name="email" placeholder="Correo Electrónico" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+    <select name="role" required>
         {% for role in roles %}
             <option value="{{ role.name }}">{{ role.name }}</option>
         {% endfor %}

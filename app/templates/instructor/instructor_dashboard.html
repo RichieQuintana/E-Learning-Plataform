@@ -1,39 +1,40 @@
 <div class="container">
-    <header>
+  <header>
       <h1>Bienvenido, {{ current_user.username }}</h1>
       <div class="actions">
-        <a href="{{ url_for('logout') }}" class="button button-danger">Cerrar sesión</a>
-        <a href="{{ url_for('create_course') }}" class="button button-primary">Crear Curso</a>
+          <a href="{{ url_for('profile') }}" class="button button-secondary">Mi Perfil</a>
+          <a href="{{ url_for('logout') }}" class="button button-danger">Cerrar sesión</a>
+          <a href="{{ url_for('create_course') }}" class="button button-primary">Crear Curso</a>
       </div>
-    </header>
-  
-    <main>
+  </header>
+
+  <main>
       <section>
-        <h2>Mis Cursos</h2>
-        <p>Total: {{ courses|length }}</p>
+          <h2>Mis Cursos</h2>
+          <p>Total: {{ courses|length }}</p>
       </section>
-  
+
       <section class="course-list">
-        {% if courses %}
-          <ul>
-            {% for course in courses %}
-              <li>
-                <div class="course-info">
-                  <h3>{{ course.title }}</h3>
-                  <p>{{ course.description }}</p>
-                </div>
-                <div class="actions">
-                  <a href="{{ url_for('edit_course', course_id=course.id) }}" class="button button-secondary">Editar Curso</a>
-                  <a href="{{ url_for('manage_course', course_id=course.id) }}" class="button button-secondary">Gestionar Curso</a>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p>No tienes cursos creados aún.</p>
-        {% endif %}
+          {% if courses %}
+              <ul>
+                  {% for course in courses %}
+                      <li>
+                          <div class="course-info">
+                              <h3>{{ course.title }}</h3>
+                              <p>{{ course.description }}</p>
+                          </div>
+                          <div class="actions">
+                              <a href="{{ url_for('edit_course', course_id=course.id) }}" class="button button-secondary">Editar Curso</a>
+                              <a href="{{ url_for('manage_course', course_id=course.id) }}" class="button button-secondary">Gestionar Curso</a>
+                          </div>
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% else %}
+              <p>No tienes cursos creados aún.</p>
+          {% endif %}
       </section>
-    </main>
-  </div>
-  
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/instructor_dashboard.css') }}">
+  </main>
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instructor_dashboard.css') }}">

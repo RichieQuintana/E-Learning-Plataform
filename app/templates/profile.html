@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+</head>
+<body>
+    <h1>Mi Perfil</h1>
+    <div class="profile-container">
+        <img src="{{ current_user.profile_picture or url_for('static', filename='img/default-avatar.png') }}" alt="Foto de perfil">
+        <p><strong>Usuario:</strong> {{ current_user.username }}</p>
+        <p><strong>Correo:</strong> {{ current_user.email }}</p>
+        <a href="{{ url_for('change_password') }}" class="button">Cambiar Contraseña</a>
+        <br>
+        {% if current_user.role_id == 1 %} {# Asumiendo que '1' es estudiante #}
+            <a href="{{ url_for('student_dashboard') }}" class="button">Regresar al Panel del Estudiante</a>
+        {% elif current_user.role_id == 2 %} {# Asumiendo que '2' es instructor #}
+            <a href="{{ url_for('instructor_dashboard') }}" class="button">Regresar al Panel del Instructor</a>
+        {% else %}
+            <a href="{{ url_for('logout') }}" class="button">Cerrar sesión</a>
+        {% endif %}
+    </div>
+</body>
+</html>

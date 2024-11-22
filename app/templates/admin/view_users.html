@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ver Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Usuarios Registrados</h1>
+
+    <h2>Estudiantes</h2>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.username }} ({{ student.email }})</li>
+        {% else %}
+            <li>No hay estudiantes registrados.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Instructores</h2>
+    <ul>
+        {% for instructor in instructors %}
+            <li>{{ instructor.username }} ({{ instructor.email }})</li>
+        {% else %}
+            <li>No hay instructores registrados.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Administradores</h2>
+    <ul>
+        {% for admin in admins %}
+            <li>{{ admin.username }} ({{ admin.email }})</li>
+        {% else %}
+            <li>No hay administradores registrados.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('admin_dashboard') }}">Volver al Panel de Administrador</a>
+</body>
+</html>

@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)  # Asegúrate de que este campo exista
     password = db.Column(db.String(150), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     role = db.relationship('Role')
@@ -36,7 +37,7 @@ class Module(db.Model):
     title = db.Column(db.String(200), nullable=False)
     order = db.Column(db.Integer, nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)  # Corregido
-    content_items = db.relationship('ContentItem', backref='module', lazy=True, order_by='ContentItem.order')
+    content_items = db.relationship('ContentItem', backref='module', lazy=True, cascade='all, delete-orphan', order_by='ContentItem.order')
 
 class ContentItem(db.Model):
     __tablename__ = 'content_items'

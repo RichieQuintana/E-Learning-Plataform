@@ -8,8 +8,8 @@ from flask_migrate import Migrate
 from models import db, User, Role, Course, Module, ContentItem, CourseEnrollment, StudentResponse
 from functools import wraps
 from datetime import datetime
+import os
 import json
-
 
 # Configuración de la aplicación
 app = Flask(__name__, template_folder="app/templates", static_folder="app/static")
@@ -40,27 +40,32 @@ def role_required(role):
 
 # Crear rol y usuario administrador inicial
 with app.app_context():
-    db.create_all()  # Crear tablas en la base de datos si no existen
+    try:
+        db.create_all()  # Crear tablas en la base de datos si no existen
 
-    # Crear roles si no existen
-    roles = ['admin', 'instructor', 'student']
-    for role_name in roles:
-        role = Role.query.filter_by(name=role_name).first()
-        if not role:
-            new_role = Role(name=role_name)
-            db.session.add(new_role)
-    db.session.commit()
-
-    # Crear usuario administrador inicial si no existe
-    admin_role = Role.query.filter_by(name='admin').first()
-    admin_user = User.query.filter_by(username='admin').first()
-    
-    if not admin_user and admin_role:
-        password_hash = bcrypt.generate_password_hash('admin123').decode('utf-8')
-        admin_user = User(username='admin', password=password_hash, role=admin_role)
-        db.session.add(admin_user)
+        # Crear roles si no existen
+        roles = ['admin', 'instructor', 'student']
+        for role_name in roles:
+            role = Role.query.filter_by(name=role_name).first()
+            if not role:
+                new_role = Role(name=role_name)
+                db.session.add(new_role)
         db.session.commit()
-        print("Usuario administrador creado con éxito. Usuario: 'admin', Contraseña: 'admin123'")
+
+        # Crear usuario administrador inicial si no existe
+        admin_role = Role.query.filter_by(name='admin').first()
+        admin_user = User.query.filter_by(username='admin').first()
+
+        if not admin_user and admin_role:
+            password_hash = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            admin_user = User(username='admin', email='admin@example.com', password=password_hash, role=admin_role)
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Usuario administrador creado con éxito. Usuario: 'admin', Contraseña: 'admin123'")
+    except Exception as e:
+        print(f"Error al crear la base de datos o el usuario administrador: {e}")
+        db.session.rollback()
+
 
 # Rutas del Administrador
 @app.route('/admin/dashboard')
@@ -84,19 +89,43 @@ def manage_courses():
 def register_user():
     if request.method == 'POST':
         username = request.form['username']
+        email = request.form['email']
         password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
         role_name = request.form['role']
+
+        # Buscar el rol
         role = Role.query.filter_by(name=role_name).first()
+
         if not role:
             flash('Rol no encontrado', 'danger')
             return redirect(url_for('register_user'))
-        user = User(username=username, password=password, role=role)
-        db.session.add(user)
+
+        # Crear el usuario
+        new_user = User(username=username, email=email, password=password, role=role)
+        db.session.add(new_user)
         db.session.commit()
-        flash('Usuario creado exitosamente', 'success')
+        flash('Usuario creado exitosamente.', 'success')
         return redirect(url_for('admin_dashboard'))
+
     roles = Role.query.all()
     return render_template('admin/register_user.html', roles=roles)
+
+@app.route('/admin/view_users')
+@login_required
+@role_required('admin')
+def view_users():
+    # Verifica que el usuario sea administrador
+    if current_user.role.name != 'admin':
+        abort(403)
+
+    # Obtener usuarios por rol
+    students = User.query.join(Role).filter(Role.name == 'student').all()
+    instructors = User.query.join(Role).filter(Role.name == 'instructor').all()
+    admins = User.query.join(Role).filter(Role.name == 'admin').all()
+
+    # Pasar los usuarios a la plantilla
+    return render_template('admin/view_users.html', students=students, instructors=instructors, admins=admins)
+
 
 @app.route('/admin/view_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
@@ -185,20 +214,57 @@ def create_module(course_id):
     
     return render_template('instructor/create_module.html', course=course)
 
+@app.route('/instructor/delete_module/<int:course_id>/<int:module_id>', methods=['POST'])
+@login_required
+@role_required('instructor')
+def delete_module(course_id, module_id):
+    course = Course.query.get_or_404(course_id)
+    module = Module.query.get_or_404(module_id)
+    
+    if module.course_id != course_id:
+        flash('El módulo no pertenece a este curso.', 'error')
+        return redirect(url_for('manage_course', course_id=course_id))
+
+    db.session.delete(module)
+    db.session.commit()
+    
+    # Actualizar el orden de los módulos restantes
+    remaining_modules = Module.query.filter_by(course_id=course_id).order_by(Module.order).all()
+    for index, remaining_module in enumerate(remaining_modules, start=1):
+        remaining_module.order = index
+    db.session.commit()
+
+    flash('Módulo eliminado exitosamente.', 'success')
+    return redirect(url_for('manage_course', course_id=course_id))
+
 @app.route('/instructor/create_content/<int:course_id>/<int:module_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('instructor')
 def create_content(course_id, module_id):
-
     module = Module.query.get_or_404(module_id)
     
     if request.method == 'POST':
         title = request.form.get('title')
         content_type = request.form.get('type')
-        content = request.form.get('content')
+        
+        # Lógica para manejar contenido según tipo
+        if content_type == 'quiz':
+            content = request.form.get('quiz_data')  # JSON con preguntas del quiz
+        elif content_type == 'video':
+            content = request.form.get('video_url')  # URL del video
+        elif content_type == 'text':
+            uploaded_file = request.files.get('text_file')
+            if uploaded_file:
+                # Guardar el archivo (ejemplo: PDF o texto)
+                file_path = os.path.join('uploads', uploaded_file.filename)
+                uploaded_file.save(file_path)
+                content = file_path
+            else:
+                content = request.form.get('text_data')  # Texto manual ingresado
+            
         new_content = ContentItem(
-            title=title, 
-            type=content_type, 
+            title=title,
+            type=content_type,
             content=content,
             order=len(module.content_items) + 1,
             module_id=module_id
@@ -209,6 +275,7 @@ def create_content(course_id, module_id):
         return redirect(url_for('manage_course', course_id=course_id))
     
     return render_template('instructor/create_content.html', course_id=course_id, module_id=module_id)
+
 
 @app.route('/instructor/edit_content/<int:content_id>', methods=['GET', 'POST'])
 @login_required
@@ -394,7 +461,19 @@ def logout():
     flash('Sesión cerrada', 'success')
     return redirect(url_for('login'))
 
-# Comando para actualizar la contraseña de un usuario específico desde la terminal
+#Perfil de los usuarios
+@app.route('/profile')
+@login_required
+def profile():
+    user = User.query.get(current_user.id)
+    return render_template('profile.html', user=user)
+
+@app.route('/profile_students')
+@login_required
+def profile_students():
+    return render_template('profile.html')
+
+# Comando para actualizar la contraseña de un usuario 
 @app.cli.command("update-password")
 def update_password():
     """Actualizar la contraseña de un usuario específico"""
@@ -408,6 +487,28 @@ def update_password():
         print(f"Contraseña actualizada exitosamente para el usuario {username}.")
     else:
         print("Usuario no encontrado.")
+
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if not current_user.check_password(current_password):
+            flash('La contraseña actual es incorrecta.', 'error')
+            return redirect('/change-password')
+
+        if new_password != confirm_password:
+            flash('Las contraseñas no coinciden.', 'error')
+            return redirect('/change-password')
+
+        current_user.set_password(new_password)
+        db.session.commit()
+        flash('Contraseña cambiada exitosamente.', 'success')
+        return redirect('/profile')
+    return render_template('change_password.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
