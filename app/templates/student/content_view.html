@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ content.title }}</h1>
+{% if content.type == 'video' %}
+    <video controls>
+        <source src="{{ url_for('static', filename='uploads/' + content.content) }}" type="video/mp4">
+        Tu navegador no soporta la reproducción de video.
+    </video>
+{% elif content.type == 'text' %}
+    <p>{{ content.content }}</p>
+{% elif content.type == 'file' %}
+    <a href="{{ url_for('static', filename='uploads/' + content.file_path) }}" download>Descargar Archivo</a>
+{% elif content.type == 'link' %}
+    <a href="{{ content.content }}" target="_blank">Abrir Enlace</a>
+{% endif %}
+<a href="{{ url_for('view_module_content', course_id=content.module.course_id, module_id=content.module.id) }}" class="btn btn-secondary">Volver al Módulo</a>
+{% endblock %}

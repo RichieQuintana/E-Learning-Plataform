@@ -1,0 +1,38 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class="fas fa-tools"></i>
+        <h2>Panel Admin</h2>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('register_user') }}">
+                <i class="fas fa-user-plus"></i>
+                <span>Registrar Usuario</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('manage_courses') }}">
+                <i class="fas fa-book"></i>
+                <span>Gestionar Cursos</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('view_users') }}">
+                <i class="fas fa-users"></i>
+                <span>Ver Usuarios</span>
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </li>
+    </ul>
+</div>

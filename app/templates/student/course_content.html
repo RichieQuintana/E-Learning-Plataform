@@ -1,44 +1,23 @@
-<!-- app/templates/student/course_content.html -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ course.title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>{{ course.title }}</h1>
-        <div class="progress-bar">
-            <div class="progress" style="width: '{{ enrollment.progress }}%'"></div>
-        </div>
-        <p>Progreso total: {{ enrollment.progress|round }}%</p>
+{% extends "base.html" %}
 
-        <div class="modules-container">
-            {% for module in course.modules %}
-            <div class="module-card">
-                <h2>Módulo {{ module.order }}: {{ module.title }}</h2>
-                <div class="content-items">
-                    {% for item in module.content_items %}
-                    <div class="content-item">
-                        {% set response = item.responses|selectattr('student_id', 'equalto', current_user.id)|first %}
-                        
-                        <span class="item-type {{ item.type }}">{{ item.type|title }}</span>
-                        <a href="{{ url_for('view_content', content_id=item.id) }}" 
-                           class="content-link {% if response and response.completed %}completed{% endif %}">
-                            {{ item.title }}
-                            {% if response and response.completed %}
-                                <span class="completion-status">✓</span>
-                            {% endif %}
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <a href="{{ url_for('view_courses') }}" class="back-button">Volver a Cursos</a>
-    </div>
-</body>
-</html>
+{% block content %}
+<h1>{{ course.name }}</h1>
+<p>{{ course.description }}</p>
+
+<h3>Módulos del Curso:</h3>
+<ul>
+    {% for module in modules %}
+    <li>
+        <h4>{{ module.title }}</h4>
+        <p>{{ module.description }}</p>
+        <a href="{{ url_for('view_module_content', course_id=course.id, module_id=module.id) }}" class="btn btn-primary">
+            Ver Contenido del Módulo
+        </a>
+    </li>
+    {% else %}
+    <p>No hay módulos disponibles para este curso.</p>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Volver a Mis Cursos</a>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h1>Crear un Nuevo Módulo</h1>
+
+<form method="POST">
+    <div class="form-group">
+        <label for="title">Título del Módulo</label>
+        <input type="text" id="title" name="title" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Descripción del Módulo</label>
+        <textarea id="description" name="description" class="form-control" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Crear Módulo</button>
+    <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

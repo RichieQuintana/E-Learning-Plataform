@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Mis Cursos</h1>
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ course.name }}</h5>
+                <p class="card-text">{{ course.description }}</p>
+                <a href="{{ url_for('course_content', course_id=course.id) }}" class="btn btn-primary">Ver Curso</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No estás inscrito en ningún curso.</p>
+    {% endfor %}
+</div>
+{% endblock %}

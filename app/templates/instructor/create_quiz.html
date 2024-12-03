@@ -1,0 +1,98 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h1>Crear Quiz para el Módulo: {{ module.title }}</h1>
+
+<form method="POST" action="{{ url_for('new_quiz', module_id=module.id) }}">
+    <label for="title">Título del Quiz</label>
+    <input type="text" id="title" name="title" class="form-control mb-3" required>
+
+    <div id="questions">
+        <!-- Pregunta inicial -->
+        <div class="question mb-4" id="question_1">
+            <label for="question_text_1">Pregunta 1</label>
+            <input type="text" id="question_text_1" name="questions[]" class="form-control mb-2" required>
+
+            <label for="type_1">Tipo de Pregunta</label>
+            <select id="type_1" name="question_types[]" class="form-control mb-3" onchange="toggleOptions(this, 1)">
+                <option value="multiple_choice" selected>Opción Múltiple</option>
+                <option value="open_ended">Respuesta Abierta</option>
+            </select>
+
+            <!-- Opciones para preguntas de opción múltiple -->
+            <div id="options_1" class="options-container">
+                <label>Opciones</label>
+                <div class="option d-flex align-items-center mb-2">
+                    <input type="radio" name="correct_answers[1]" value="1" class="me-2">
+                    <input type="text" name="options[1][]" class="form-control" placeholder="Opción 1" required>
+                </div>
+                <div class="option d-flex align-items-center mb-2">
+                    <input type="radio" name="correct_answers[1]" value="2" class="me-2">
+                    <input type="text" name="options[1][]" class="form-control" placeholder="Opción 2" required>
+                </div>
+                <div class="option d-flex align-items-center mb-2">
+                    <input type="radio" name="correct_answers[1]" value="3" class="me-2">
+                    <input type="text" name="options[1][]" class="form-control" placeholder="Opción 3">
+                </div>
+                <div class="option d-flex align-items-center mb-2">
+                    <input type="radio" name="correct_answers[1]" value="4" class="me-2">
+                    <input type="text" name="options[1][]" class="form-control" placeholder="Opción 4">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-secondary mb-3" onclick="addQuestion()">Añadir Pregunta</button>
+    <button type="submit" class="btn btn-primary">Crear Quiz</button>
+</form>
+
+<script>
+    let questionCount = 1;
+
+    function addQuestion() {
+        questionCount++;
+        const questionsDiv = document.getElementById('questions');
+        const newQuestion = `
+            <div class="question mb-4" id="question_${questionCount}">
+                <label for="question_text_${questionCount}">Pregunta ${questionCount}</label>
+                <input type="text" id="question_text_${questionCount}" name="questions[]" class="form-control mb-2" required>
+
+                <label for="type_${questionCount}">Tipo de Pregunta</label>
+                <select id="type_${questionCount}" name="question_types[]" class="form-control mb-3" onchange="toggleOptions(this, ${questionCount})">
+                    <option value="multiple_choice" selected>Opción Múltiple</option>
+                    <option value="open_ended">Respuesta Abierta</option>
+                </select>
+
+                <div id="options_${questionCount}" class="options-container">
+                    <label>Opciones</label>
+                    <div class="option d-flex align-items-center mb-2">
+                        <input type="radio" name="correct_answers[${questionCount}]" value="1" class="me-2">
+                        <input type="text" name="options[${questionCount}][]" class="form-control" placeholder="Opción 1" required>
+                    </div>
+                    <div class="option d-flex align-items-center mb-2">
+                        <input type="radio" name="correct_answers[${questionCount}]" value="2" class="me-2">
+                        <input type="text" name="options[${questionCount}][]" class="form-control" placeholder="Opción 2" required>
+                    </div>
+                    <div class="option d-flex align-items-center mb-2">
+                        <input type="radio" name="correct_answers[${questionCount}]" value="3" class="me-2">
+                        <input type="text" name="options[${questionCount}][]" class="form-control" placeholder="Opción 3">
+                    </div>
+                    <div class="option d-flex align-items-center mb-2">
+                        <input type="radio" name="correct_answers[${questionCount}]" value="4" class="me-2">
+                        <input type="text" name="options[${questionCount}][]" class="form-control" placeholder="Opción 4">
+                    </div>
+                </div>
+            </div>`;
+        questionsDiv.insertAdjacentHTML('beforeend', newQuestion);
+    }
+
+    function toggleOptions(select, questionId) {
+        const optionsDiv = document.getElementById(`options_${questionId}`);
+        if (select.value === 'open_ended') {
+            optionsDiv.style.display = 'none';
+        } else {
+            optionsDiv.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

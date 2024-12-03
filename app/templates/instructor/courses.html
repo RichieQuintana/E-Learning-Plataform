@@ -1,0 +1,18 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h2>Mis Cursos</h2>
+<ul>
+    {% for course in courses %}
+    <li>
+        <strong>{{ course.name }}</strong><br>
+        {{ course.description }}<br>
+        <a href="{{ url_for('course_details', course_id=course.id) }}">Ver Detalles</a>
+        <a href="{{ url_for('edit_course', course_id=course.id) }}">Editar</a>
+        <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST" style="display:inline;">
+            <button type="submit">Eliminar</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

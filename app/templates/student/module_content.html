@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module_styles.css') }}">
+
+<div class="module-container">
+    <h1 class="module-title">{{ module.title }}</h1>
+    <p class="module-description">{{ module.description }}</p>
+
+    <h3 class="content-heading">Contenido del Módulo:</h3>
+    <div class="content-items">
+        {% for content in content_items %}
+        <div class="content-item mb-4">
+            <h4 class="content-title">{{ content.title }}</h4>
+
+            {% if content.type == 'text' %}
+            <p class="content-text">{{ content.content or "Contenido no disponible" }}</p>
+
+            {% elif content.type == 'video' %}
+            {% if content.content %}
+            <div class="video-container">
+                <iframe width="640" height="360" src="{{ content.content | youtube_embed }}" frameborder="0" allowfullscreen></iframe>
+            </div>
+            {% else %}
+            <p class="text-danger">Video no disponible.</p>
+            {% endif %}
+
+            {% elif content.type == 'file' %}
+            {% if content.file_path %}
+            <p>
+                <a href="{{ url_for('static', filename='uploads/' + content.file_path) }}" target="_blank" class="btn btn-outline-primary">Ver Archivo</a>
+            </p>
+            {% else %}
+            <p class="text-danger">Archivo no disponible.</p>
+            {% endif %}
+
+            {% elif content.type == 'quiz' %}
+            <p>
+                <a href="{{ url_for('take_quiz', course_id=module.course_id, quiz_id=content.id) }}" class="btn btn-primary">
+                    Tomar Quiz: {{ content.title }}
+                </a>
+            </p>
+            {% endif %}
+        </div>
+        {% else %}
+        <p class="text-muted">No hay contenido disponible en este módulo.</p>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('course_content', course_id=module.course_id) }}" class="btn btn-secondary mt-4">Volver al Curso</a>
+</div>
+{% endblock %}
+
+
+

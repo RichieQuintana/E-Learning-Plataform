@@ -1,41 +1,50 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/manage_courses.css') }}">
-    <title>Administrar Cursos</title>
+    <title>Gestionar Cursos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
 </head>
 <body>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn back">Volver al Inicio</a>
+    <div class="admin-container">
+        {% include 'admin/sidebar.html' %}
 
-    <h1>Administrar Cursos</h1>
+        <main class="main-content">
+            <header class="top-bar">
+                <h1>Gestionar Cursos</h1>
+            </header>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre del Curso</th>
-                <th>Descripción</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for course in courses %}
-                <tr>
-                    <td>{{ course.title }}</td>
-                    <td>{{ course.description }}</td>
-                    <td>
-                        <a href="{{ url_for('view_course', course_id=course.id) }}" class="btn btn-info">
-                            <i class="fa fa-eye"></i> Ver
-                        </a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3">No hay cursos disponibles.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <table class="courses-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Curso</th>
+                        <th>Descripción</th>
+                        <th>Instructor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    <tr>
+                        <td>{{ course.id }}</td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.description }}</td>
+                        <td>{{ course.instructor.username }}</td>
+                        <td>
+                            <a href="{{ url_for('view_course', course_id=course.id) }}" class="btn btn-info">Ver</a>
+                            <form method="POST" action="{{ url_for('delete_course', course_id=course.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
 </body>
 </html>

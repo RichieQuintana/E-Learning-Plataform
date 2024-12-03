@@ -1,24 +1,16 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Curso</title>
-</head>
-<body>
-    <h1>Editar Curso: {{ course.title }}</h1>
-    <form action="{{ url_for('edit_course', course_id=course.id) }}" method="POST">
-        <label for="title">Título del Curso:</label>
-        <input type="text" id="title" name="title" value="{{ course.title }}" required>
-        <br>
+{% extends "instructor/instructor_dashboard.html" %}
 
-        <label for="description">Descripción:</label>
-        <textarea id="description" name="description" required>{{ course.description }}</textarea>
-        <br>
+{% block title %}Editar Curso{% endblock %}
 
-        <button type="submit">Guardar Cambios</button>
-    </form>
+{% block content %}
+<h1>Editar Curso: {{ course.name }}</h1>
+<form method="POST">
+    <label for="title">Título del Curso</label>
+    <input type="text" id="title" name="title" value="{{ course.name }}" required>
 
-    <br>
-    <a href="{{ url_for('instructor_dashboard') }}">Volver al Inicio</a>
-</body>
-</html>
+    <label for="description">Descripción</label>
+    <textarea id="description" name="description" required>{{ course.description }}</textarea>
+
+    <button type="submit" class="btn">Actualizar Curso</button>
+</form>
+{% endblock %}

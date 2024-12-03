@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ quiz.title }}</h1>
+<form method="POST">
+    {% for question in quiz.questions %}
+    <div class="mb-3">
+        <label>{{ loop.index }}. {{ question.question_text }}</label>
+        {% if question.question_type == 'multiple_choice' %}
+        {% for option in question.get_options() %}
+        <div>
+            <input type="radio" id="question_{{ question.id }}_{{ loop.index }}" name="question_{{ question.id }}" value="{{ option }}">
+            <label for="question_{{ question.id }}_{{ loop.index }}">{{ option }}</label>
+        </div>
+        {% endfor %}
+        {% else %}
+        <input type="text" name="question_{{ question.id }}" class="form-control">
+        {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Enviar Respuestas</button>
+</form>
+{% endblock %}

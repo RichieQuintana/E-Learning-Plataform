@@ -1,0 +1,76 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h1>Editar Quiz: {{ quiz.title }}</h1>
+
+<form method="POST">
+    <label for="title">Título del Quiz</label>
+    <input type="text" id="title" name="title" class="form-control mb-3" value="{{ quiz.title }}" required>
+
+    <div id="questions">
+        {% for question in quiz.questions %}
+        <div class="question mb-3" id="question_{{ question.id }}">
+            <label for="question_text_{{ question.id }}">Pregunta {{ loop.index }}</label>
+            <input type="text" id="question_text_{{ question.id }}" name="questions[{{ question.id }}][text]" class="form-control mb-2" value="{{ question.question_text }}" required>
+
+            <label for="type_{{ question.id }}">Tipo de Pregunta</label>
+            <select id="type_{{ question.id }}" name="questions[{{ question.id }}][type]" class="form-control mb-2" onchange="toggleOptions(this, '{{ question.id }}')">
+                <option value="multiple_choice" {% if question.question_type == 'multiple_choice' %}selected{% endif %}>Opción Múltiple</option>
+                <option value="open_ended" {% if question.question_type == 'open_ended' %}selected{% endif %}>Respuesta Abierta</option>
+            </select>
+
+            <div id="options_{{ question.id }}" class="options-container" {% if question.question_type == 'open_ended' %}style="display: none;"{% endif %}>
+                <label>Opciones</label>
+                {% for index, option in enumerate(question.get_options()) %}
+                <div class="d-flex align-items-center mb-2">
+                    <input type="radio" id="correct_{{ question.id }}_{{ index }}" name="questions[{{ question.id }}][correct]" value="{{ option }}" {% if option == question.correct_answer %}checked{% endif %}>
+                    <input type="text" id="option_{{ question.id }}_{{ index }}" name="questions[{{ question.id }}][options][{{ index }}]" class="form-control ms-2" value="{{ option }}" required>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="addQuestion()">Añadir Pregunta</button>
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>
+
+<script>
+    let questionCount = '{{ quiz.questions|length }}';
+
+    function addQuestion() {
+        questionCount++;
+        const questionsDiv = document.getElementById('questions');
+        const newQuestion = `
+            <div class="question mb-3" id="new_question_${questionCount}">
+                <label for="new_question_text_${questionCount}">Pregunta ${questionCount}</label>
+                <input type="text" id="new_question_text_${questionCount}" name="questions[new_${questionCount}][text]" class="form-control mb-2" required>
+
+                <label for="new_type_${questionCount}">Tipo de Pregunta</label>
+                <select id="new_type_${questionCount}" name="questions[new_${questionCount}][type]" class="form-control mb-2" onchange="toggleOptions(this, 'new_${questionCount}')">
+                    <option value="multiple_choice" selected>Opción Múltiple</option>
+                    <option value="open_ended">Respuesta Abierta</option>
+                </select>
+
+                <div id="new_options_${questionCount}" class="options-container">
+                    <label>Opciones</label>
+                    <div class="d-flex align-items-center mb-2">
+                        <input type="radio" id="new_correct_${questionCount}_1" name="questions[new_${questionCount}][correct]" value="1">
+                        <input type="text" id="new_option_${questionCount}_1" name="questions[new_${questionCount}][options][1]" class="form-control ms-2" placeholder="Opción 1" required>
+                    </div>
+                </div>
+            </div>`;
+        questionsDiv.insertAdjacentHTML('beforeend', newQuestion);
+    }
+
+    function toggleOptions(select, questionId) {
+        const optionsDiv = document.getElementById(`options_${questionId}`);
+        if (select.value === 'open_ended') {
+            optionsDiv.style.display = 'none';
+        } else {
+            optionsDiv.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

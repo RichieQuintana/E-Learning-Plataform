@@ -1,0 +1,59 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h1>Agregar Contenido al Módulo: {{ module.title }}</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title">Título del Contenido</label>
+        <input type="text" id="title" name="title" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="content_type">Tipo de Contenido</label>
+        <select id="content_type" name="content_type" class="form-control" required>
+            <option value="text">Texto</option>
+            <option value="video">Video</option>
+        </select>
+    </div>
+
+    <!-- Sección para texto o enlace -->
+    <div class="form-group" id="text-content-section">
+        <label for="text_content">Texto o Enlace</label>
+        <textarea id="text_content" name="text_content" class="form-control"></textarea>
+    </div>
+
+    <!-- Sección para subir archivo -->
+    <div class="form-group" id="file-section">
+        <label for="file">Subir Archivo</label>
+        <input type="file" id="file" name="file" class="form-control">
+    </div>
+
+    <!-- Sección para enlace de video -->
+    <div class="form-group" id="video-url-section">
+        <label for="video_url">Enlace de YouTube</label>
+        <input type="url" id="video_url" name="video_url" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Agregar Contenido</button>
+    <a href="{{ url_for('module_details', module_id=module.id) }}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<script>
+    // Mostrar u ocultar campos dependiendo del tipo de contenido
+    const contentType = document.getElementById('content_type');
+    const textContentSection = document.getElementById('text-content-section');
+    const fileSection = document.getElementById('file-section');
+    const videoUrlSection = document.getElementById('video-url-section');
+
+    function toggleSections() {
+    const value = contentType.value;
+    textContentSection.style.display = value === 'text' ? 'block' : 'none';
+    fileSection.style.display = value === 'file' ? 'block' : 'none';
+    videoUrlSection.style.display = value === 'video' ? 'block' : 'none';
+}
+
+
+    contentType.addEventListener('change', toggleSections);
+    toggleSections();  // Inicializar
+</script>
+{% endblock %}

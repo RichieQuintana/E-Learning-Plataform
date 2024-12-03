@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Progreso del Curso: {{ enrollment.course.name }}</h1>
+<p>Progreso: {{ enrollment.progress }}%</p>
+<p>
+    {% if enrollment.completed %}
+    ¡Felicidades! Has completado el curso.
+    {% else %}
+    Sigue avanzando para completarlo.
+    {% endif %}
+</p>
+<a href="{{ url_for('course_content', course_id=enrollment.course.id) }}">Volver al Curso</a>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "instructor/instructor_dashboard.html" %}
+
+{% block content %}
+<h1>Quizzes en el Módulo: {{ module.title }}</h1>
+
+<a href="{{ url_for('new_quiz', module_id=module.id) }}" class="btn btn-primary mb-3">Añadir Nuevo Quiz</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for quiz in quizzes %}
+        <tr>
+            <td>{{ quiz.title }}</td>
+            <td>
+                <a href="{{ url_for('edit_quiz', quiz_id=quiz.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="2">No hay quizzes creados en este módulo.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('module_details', module_id=module.id) }}" class="btn btn-secondary">Volver al Módulo</a>
+{% endblock %}

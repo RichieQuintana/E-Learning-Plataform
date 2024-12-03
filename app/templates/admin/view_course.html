@@ -3,25 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_course.css') }}">
-
-    <title>Ver Curso</title>
+    <title>Detalles del Curso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
 </head>
 <body>
-    <h1>Detalles del Curso</h1>
+    <div class="admin-container">
+        {% include 'admin/sidebar.html' %}
 
-    <div>
-        <h2>{{ course.title }}</h2>
-        <p>{{ course.description }}</p>
+        <main class="main-content">
+            <header class="top-bar">
+                <h1>Detalles del Curso</h1>
+            </header>
+
+            <div class="course-details">
+                <h2>{{ course.name }}</h2>
+                <p>{{ course.description }}</p>
+                <h3>Instructor: {{ course.instructor.username }}</h3>
+                <h4>Módulos:</h4>
+                <ul>
+                    {% for module in course.modules %}
+                        <li>{{ module.title }} - {{ module.description }}</li>
+                    {% else %}
+                        <li>No hay módulos en este curso.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </main>
     </div>
-
-    <a href="{{ url_for('manage_courses') }}" class="btn btn-secondary">Volver a Administrar Cursos</a>
-
-    <!-- Formulario para eliminar el curso -->
-    <form action="{{ url_for('view_course', course_id=course.id) }}" method="POST" style="display:inline;">
-        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
-            <i class="fa fa-trash"></i> Eliminar Curso
-        </button>
-    </form>
 </body>
 </html>

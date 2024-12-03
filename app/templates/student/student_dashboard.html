@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Panel del Estudiante</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/student_dashboard.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <!-- Cargando Font Awesome -->
-</head>
-<body>
-    <h1>Bienvenido estudiante {{ current_user.username }}</h1>
+{% extends "base.html" %}
 
-    <nav>
-        <a href="{{ url_for('view_courses') }}"><i class="fa fa-book"></i> Ver Cursos Disponibles</a>
-        <a href="{{ url_for('profile') }}"><i class="fa fa-user"></i> Mi Perfil</a>
-        <a style="margin-left: auto;" href="{{ url_for('logout') }}"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</a>
-    </nav>
-
-    <div class="content">
-        <h2>Información adicional o enlaces relacionados a tu panel de estudiante</h2>
-        <ul>
-            <li><i class="fa fa-certificate"></i> Cursos completados</li>
-            <li><i class="fa fa-trophy"></i> Logros alcanzados</li>
-        </ul>
+{% block content %}
+<h1 class="mb-4">Mis Cursos</h1>
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ course.name }}</h5>
+                <p class="card-text">{{ course.description }}</p>
+                <a href="{{ url_for('course_content', course_id=course.id) }}" class="btn btn-primary">Entrar al Curso</a>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+    {% else %}
+    <p>No estás inscrito en ningún curso.</p>
+    {% endfor %}
+</div>
+{% endblock %}
