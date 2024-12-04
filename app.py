@@ -188,9 +188,47 @@ def delete_user(user_id):
 @login_required
 @role_required('instructor')
 def instructor_dashboard():
-    """Panel principal del instructor."""
+    """Dashboard del instructor con métricas comparativas."""
     courses = Course.query.filter_by(instructor_id=current_user.id).all()
-    return render_template('instructor/instructor_dashboard.html', courses=courses)
+
+    course_metrics = []
+
+    for course in courses:
+        total_students = len(course.enrollments)
+        total_scores = 0
+        total_responses = 0
+        completed_responses = 0
+
+    for enrollment in course.enrollments:
+        for response in enrollment.student.responses:
+            # Asegúrate de que `response.content_item.module.course_id == course.id` sea válido
+            if response.content_item and response.content_item.module and response.content_item.module.course_id == course.id:
+                if response.score is not None:
+                    total_scores += response.score
+                    total_responses += 1
+                    if response.completed:
+                        completed_responses += 1
+
+
+        # Evita la división por cero en las métricas
+        average_score = round(total_scores / total_responses, 2) if total_responses > 0 else 0
+        completion_rate = round((completed_responses / total_students) * 100, 2) if total_students > 0 else 0
+
+
+        course_metrics.append({
+            'course': course,
+            'total_students': total_students,
+            'average_score': round(average_score, 2),
+            'completion_rate': round(completion_rate, 2)
+        })
+
+    return render_template(
+        'instructor/instructor_dashboard.html',
+        courses=courses,
+        course_metrics=course_metrics
+    )
+
+
 
 @app.route('/instructor/courses', methods=['GET'])
 @login_required
@@ -638,9 +676,18 @@ def delete_quiz(quiz_id):
 @role_required('student')
 def student_dashboard():
     """Panel principal del estudiante con sus cursos inscritos."""
-    courses = Course.query.join(CourseEnrollment).filter(CourseEnrollment.student_id == current_user.id).all()
-    return render_template('student/student_dashboard.html', courses=courses)
-
+    enrollments = CourseEnrollment.query.filter_by(student_id=current_user.id).all()
+    
+    # Añadir progreso al contexto de los cursos
+    courses_with_progress = [
+        {
+            'course': enrollment.course,
+            'progress': enrollment.progress,
+            'completed': enrollment.completed
+        }
+        for enrollment in enrollments
+    ]
+    return render_template('student/student_dashboard.html', courses=courses_with_progress)
 
 @app.route('/student/explore_courses')
 @login_required
@@ -728,10 +775,13 @@ def take_quiz(quiz_id):
 
         for question in quiz.questions:
             student_answer = request.form.get(f'question_{question.id}')
+            print(f"Pregunta {question.id}: Respuesta del estudiante: {student_answer}")  # Depuración
             if student_answer and question.is_answer_correct(student_answer):
                 correct_answers += 1
 
+        # Calcular el puntaje
         score = (correct_answers / total_questions) * 10
+        print(f"Puntaje obtenido: {score}")  # Depuración
 
         # Guardar la respuesta del estudiante
         response = StudentResponse(
@@ -753,7 +803,7 @@ def take_quiz(quiz_id):
 
         db.session.commit()
 
-        # Verificar si aprobó
+        # Mostrar mensaje según el puntaje
         if score >= 7:
             flash('¡Felicidades! Has aprobado el curso y obtendrás tu certificado.', 'success')
         else:
@@ -761,7 +811,8 @@ def take_quiz(quiz_id):
 
         return redirect(url_for('student_dashboard'))
 
-    return render_template('student/take_quiz.html', quiz=quiz)
+    return render_template('student/quiz.html', quiz=quiz)
+
 
 
 @app.route('/student/enroll/<int:course_id>', methods=['POST'])

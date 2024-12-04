@@ -150,9 +150,6 @@ class QuizQuestion(db.Model):
         user = str(user_answer).strip().lower()
         return correct == user
 
-
-    
-
 # Modelo de Inscripción a Cursos
 class CourseEnrollment(db.Model):
     __tablename__ = 'course_enrollments'
@@ -187,6 +184,9 @@ class StudentResponse(db.Model):
     score = db.Column(db.Float, nullable=True)  # Puntaje (si es un quiz)
     completed = db.Column(db.Boolean, default=False)  # Estado de finalización
     completion_date = db.Column(db.DateTime, nullable=True)
+    content_item_id = db.Column(db.Integer, db.ForeignKey('content_items.id', ondelete="CASCADE"), nullable=False)
+
+    content_item = db.relationship('ContentItem', backref='responses')
 
     def mark_as_completed(self):
         """Marca este contenido como completado por el estudiante."""

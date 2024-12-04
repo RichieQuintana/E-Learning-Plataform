@@ -1,23 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ quiz.title }}</h1>
-<form method="POST">
+<h1>Realizar Quiz: {{ quiz.title }}</h1>
+
+<form method="POST" action="{{ url_for('take_quiz', quiz_id=quiz.id) }}">
     {% for question in quiz.questions %}
-    <div class="mb-3">
-        <label>{{ loop.index }}. {{ question.question_text }}</label>
-        {% if question.question_type == 'multiple_choice' %}
-        {% for option in question.get_options() %}
-        <div>
-            <input type="radio" id="question_{{ question.id }}_{{ loop.index }}" name="question_{{ question.id }}" value="{{ option }}">
-            <label for="question_{{ question.id }}_{{ loop.index }}">{{ option }}</label>
+        <div class="mb-4">
+            <p><strong>{{ loop.index }}. {{ question.question_text }}</strong></p>
+            {% if question.question_type == "multiple_choice" %}
+                {% for idx, option in enumerate(question.get_options(), start=1) %}
+                    <div>
+                        <input type="radio" id="question_{{ question.id }}_option_{{ idx }}" 
+                               name="question_{{ question.id }}" 
+                               value="{{ idx }}">
+                        <label for="question_{{ question.id }}_option_{{ idx }}">{{ option }}</label>
+                    </div>
+                {% endfor %}
+            {% elif question.question_type == "open_ended" %}
+                <textarea name="question_{{ question.id }}" class="form-control"></textarea>
+            {% endif %}
         </div>
-        {% endfor %}
-        {% else %}
-        <input type="text" name="question_{{ question.id }}" class="form-control">
-        {% endif %}
-    </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Enviar Respuestas</button>
+    <button type="submit" class="btn btn-primary">Enviar Quiz</button>
 </form>
 {% endblock %}

@@ -29,8 +29,61 @@
 
         <!-- Main Content -->
         <div class="flex-grow-1 p-4">
-            {% block content %}
-            {% endblock %}
+            <h1 class="mb-4">Panel de Instructor</h1>
+
+            <!-- Métricas Comparativas -->
+            <div class="mb-4">
+                <h3>Métricas Comparativas de Cursos</h3>
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Curso</th>
+                            <th>Estudiantes Inscritos</th>
+                            <th>Promedio de Notas</th>
+                            <th>% Finalización</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if course_metrics %}
+                            {% for metric in course_metrics %}
+                            <tr>
+                                <td>{{ metric.course.name }}</td>
+                                <td>{{ metric.total_students }}</td>
+                                <td>{{ "%.2f"|format(metric.average_score) }}</td>
+                                <td>{{ "%.2f"|format(metric.completion_rate) }}%</td>
+                            </tr>
+                            
+                            {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">No hay datos disponibles para las métricas.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lista de Cursos -->
+            <div class="mb-4">
+                <h3>Mis Cursos</h3>
+                <div class="row">
+                    {% if courses %}
+                        {% for course in courses %}
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ course.name }}</h5>
+                                    <p class="card-text">{{ course.description }}</p>
+                                    <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary">Ver Detalles</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p>No has creado ningún curso todavía.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
