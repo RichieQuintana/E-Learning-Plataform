@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, abort
+from flask import Flask, render_template, redirect, url_for, request, flash, abort, send_from_directory
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
@@ -18,16 +18,20 @@ app = Flask(__name__, template_folder="app/templates", static_folder="app/static
 app.config.from_object('config.Config')
 
 # Static Upload Folder
-UPLOAD_FOLDER = os.path.join(app.root_path, 'static/uploads')
+UPLOAD_FOLDER = os.path.join(app.root_path, 'app/static/uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt', 'mp4'}
     VALID_CONTENT_TYPES = ['text', 'video', 'file', 'quiz']
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
+# Ruta para servir los archivos subidos
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Initialize Extensions
 db.init_app(app)
@@ -37,8 +41,6 @@ login_manager.login_view = 'login'
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 csrf.init_app(app)
-
-
 
 # Registrar `enumerate` en el entorno Jinja
 app.jinja_env.globals.update(enumerate=enumerate)
@@ -91,7 +93,6 @@ with app.app_context():
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return redirect(url_for('static', filename=filename))
-
 
 # Login Route
 @app.route('/', methods=['GET', 'POST'])
@@ -188,46 +189,46 @@ def delete_user(user_id):
 @login_required
 @role_required('instructor')
 def instructor_dashboard():
-    """Dashboard del instructor con métricas comparativas."""
+    """Dashboard del instructor con comparación de cursos"""
+    # Obtiene todos los cursos del instructor
     courses = Course.query.filter_by(instructor_id=current_user.id).all()
 
+    # Lista para almacenar métricas de los cursos
     course_metrics = []
 
     for course in courses:
-        total_students = len(course.enrollments)
-        total_scores = 0
-        total_responses = 0
-        completed_responses = 0
+        total_students = len(course.enrollments)  # Total de estudiantes inscritos
+        total_scores = 0  # Suma de calificaciones
+        total_responses = 0  # Total de respuestas
+        completed_responses = 0  # Total de respuestas completadas
 
-    for enrollment in course.enrollments:
-        for response in enrollment.student.responses:
-            # Asegúrate de que `response.content_item.module.course_id == course.id` sea válido
-            if response.content_item and response.content_item.module and response.content_item.module.course_id == course.id:
-                if response.score is not None:
-                    total_scores += response.score
-                    total_responses += 1
-                    if response.completed:
-                        completed_responses += 1
+        # Calcular métricas para cada curso
+        for enrollment in course.enrollments:
+            for response in enrollment.student.responses:
+                if response.content_item and response.content_item.module and response.content_item.module.course_id == course.id:
+                    if response.score is not None:
+                        total_scores += response.score
+                        total_responses += 1
+                        if response.completed:
+                            completed_responses += 1
 
-
-        # Evita la división por cero en las métricas
+        # Cálculo del promedio de calificaciones
         average_score = round(total_scores / total_responses, 2) if total_responses > 0 else 0
-        completion_rate = round((completed_responses / total_students) * 100, 2) if total_students > 0 else 0
+        # Cálculo del porcentaje de finalización
+        completion_rate = round((completed_responses / course.get_total_content()) * 100, 2) if course.get_total_content() > 0 else 0
 
-
+        # Agregar métricas a la lista
         course_metrics.append({
             'course': course,
             'total_students': total_students,
-            'average_score': round(average_score, 2),
-            'completion_rate': round(completion_rate, 2)
+            'average_score': average_score,
+            'completion_rate': completion_rate
         })
 
-    return render_template(
-        'instructor/instructor_dashboard.html',
-        courses=courses,
-        course_metrics=course_metrics
-    )
+    # Ordenar cursos por número de estudiantes, promedio de notas y finalización
+    sorted_courses = sorted(course_metrics, key=lambda x: (x['total_students'], x['average_score'], x['completion_rate']), reverse=True)
 
+    return render_template('instructor/instructor_dashboard.html', courses=courses, course_metrics=sorted_courses)
 
 
 @app.route('/instructor/courses', methods=['GET'])
@@ -252,14 +253,15 @@ def new_course():
             flash('Por favor, completa todos los campos.', 'danger')
             return redirect(url_for('new_course'))
 
+        # Crear el curso asociado al instructor actual
         course = Course(name=title, description=description, instructor_id=current_user.id)
         db.session.add(course)
         db.session.commit()
+
         flash('Curso creado exitosamente.', 'success')
         return redirect(url_for('instructor_dashboard'))
 
     return render_template('instructor/new_course.html')
-
 
 # Editar un curso existente
 @app.route('/instructor/course/edit/<int:course_id>', methods=['GET', 'POST'])

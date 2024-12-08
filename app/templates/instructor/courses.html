@@ -1,18 +1,30 @@
-{% extends "instructor/instructor_dashboard.html" %}
+{% extends "instructor/base_instructor.html" %}
+
+{% block title %}Mis Cursos{% endblock %}
 
 {% block content %}
-<h2>Mis Cursos</h2>
-<ul>
-    {% for course in courses %}
-    <li>
-        <strong>{{ course.name }}</strong><br>
-        {{ course.description }}<br>
-        <a href="{{ url_for('course_details', course_id=course.id) }}">Ver Detalles</a>
-        <a href="{{ url_for('edit_course', course_id=course.id) }}">Editar</a>
-        <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST" style="display:inline;">
-            <button type="submit">Eliminar</button>
-        </form>
-    </li>
-    {% endfor %}
-</ul>
+<div class="mb-4">
+    <h3>Mis Cursos</h3>
+    <div class="row">
+        {% if courses %}
+            {% for course in courses %}
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.name }}</h5>
+                        <p class="card-text">{{ course.description }}</p>
+                        <a href="{{ url_for('course_details', course_id=course.id) }}" class="btn btn-primary">Ver Detalles</a>
+                        <a href="{{ url_for('edit_course', course_id=course.id) }}">Editar</a>
+                        <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST" style="display:inline;">
+                            <button type="submit">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <p>No has creado ningún curso todavía.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
