@@ -197,25 +197,39 @@ def instructor_dashboard():
     course_metrics = []
 
     for course in courses:
-        total_students = len(course.enrollments)  # Total de estudiantes inscritos
+        # Total de estudiantes inscritos
+        total_students = len(course.enrollments)
+
+        # Variables para cálculo de métricas
         total_scores = 0  # Suma de calificaciones
-        total_responses = 0  # Total de respuestas
+        total_responses = 0  # Total de respuestas evaluadas
         completed_responses = 0  # Total de respuestas completadas
 
         # Calcular métricas para cada curso
-        for enrollment in course.enrollments:
-            for response in enrollment.student.responses:
-                if response.content_item and response.content_item.module and response.content_item.module.course_id == course.id:
-                    if response.score is not None:
+        for enrollment in course.enrollments:  # Iterar sobre las inscripciones
+            for response in enrollment.student.responses:  # Iterar sobre las respuestas del estudiante
+                # Validar si la respuesta pertenece al curso actual
+                if (
+                    response.content_item
+                    and response.content_item.module
+                    and response.content_item.module.course_id == course.id
+                ):
+                    if response.score is not None:  # Si hay una calificación
                         total_scores += response.score
                         total_responses += 1
-                        if response.completed:
-                            completed_responses += 1
+                    if response.completed:  # Si la respuesta está completada
+                        completed_responses += 1
 
-        # Cálculo del promedio de calificaciones
-        average_score = round(total_scores / total_responses, 2) if total_responses > 0 else 0
-        # Cálculo del porcentaje de finalización
-        completion_rate = round((completed_responses / course.get_total_content()) * 100, 2) if course.get_total_content() > 0 else 0
+        # Cálculo del promedio de calificaciones (evitar división por 0)
+        average_score = (
+            round(total_scores / total_responses, 2) if total_responses > 0 else 0
+        )
+        # Cálculo del porcentaje de finalización (evitar división por 0)
+        total_content = course.get_total_content()  # Total de ítems de contenido
+        completion_rate = (
+            round((completed_responses / total_content) * 100, 2)
+            if total_content > 0 else 0
+        )
 
         # Agregar métricas a la lista
         course_metrics.append({
@@ -225,10 +239,19 @@ def instructor_dashboard():
             'completion_rate': completion_rate
         })
 
-    # Ordenar cursos por número de estudiantes, promedio de notas y finalización
-    sorted_courses = sorted(course_metrics, key=lambda x: (x['total_students'], x['average_score'], x['completion_rate']), reverse=True)
+    # Ordenar cursos por número de estudiantes, promedio de notas y porcentaje de finalización
+    sorted_courses = sorted(
+        course_metrics,
+        key=lambda x: (x['total_students'], x['average_score'], x['completion_rate']),
+        reverse=True
+    )
 
-    return render_template('instructor/instructor_dashboard.html', courses=courses, course_metrics=sorted_courses)
+    # Renderizar el dashboard del instructor
+    return render_template(
+        'instructor/instructor_dashboard.html',
+        courses=courses,
+        course_metrics=sorted_courses
+    )
 
 
 @app.route('/instructor/courses', methods=['GET'])
@@ -590,26 +613,35 @@ def edit_quiz(quiz_id):
 
             # Procesar preguntas
             existing_questions = {str(q.id): q for q in quiz.questions}
-            new_questions_data = request.form.getlist('questions[]')
+            question_ids = request.form.getlist('question_ids[]')  # IDs de preguntas existentes
+            question_texts = request.form.getlist('questions[]')
             question_types = request.form.getlist('question_types[]')
-            correct_answers = request.form.to_dict(flat=False).get('correct_answers', [])
+            correct_answers = request.form.getlist('correct_answers[]')
             options = request.form.to_dict(flat=False).get('options', {})
 
+            if not (len(question_texts) == len(question_types) == len(correct_answers)):
+                flash('Los datos de las preguntas no son consistentes.', 'danger')
+                return render_template('instructor/edit_quiz.html', quiz=quiz)
+
             # Actualizar preguntas existentes y agregar nuevas
-            for idx, question_text in enumerate(new_questions_data):
+            updated_questions = set()
+            for idx, question_text in enumerate(question_texts):
                 question_type = question_types[idx]
                 correct_answer = correct_answers[idx] if idx < len(correct_answers) else None
-                question_options = options.get(str(idx + 1), [])
+                question_options = options.get(f'options[{idx + 1}]', [])
 
-                if str(idx) in existing_questions:
+                question_id = question_ids[idx] if idx < len(question_ids) else None
+
+                if question_id and question_id in existing_questions:
                     # Actualizar pregunta existente
-                    question = existing_questions.pop(str(idx))
+                    question = existing_questions[question_id]
                     question.question_text = question_text
                     question.question_type = question_type
                     question.correct_answer = correct_answer
                     question.options = json.dumps(question_options) if question_type == 'multiple_choice' else None
+                    updated_questions.add(question_id)
                 else:
-                    # Agregar nueva pregunta
+                    # Crear nueva pregunta
                     new_question = QuizQuestion(
                         question_text=question_text,
                         question_type=question_type,
@@ -619,9 +651,10 @@ def edit_quiz(quiz_id):
                     )
                     db.session.add(new_question)
 
-            # Eliminar preguntas no incluidas en la actualización
-            for question in existing_questions.values():
-                db.session.delete(question)
+            # Eliminar preguntas que no fueron incluidas
+            for question_id, question in existing_questions.items():
+                if question_id not in updated_questions:
+                    db.session.delete(question)
 
             db.session.commit()
             flash('Quiz actualizado exitosamente.', 'success')
@@ -629,6 +662,7 @@ def edit_quiz(quiz_id):
 
         except Exception as e:
             db.session.rollback()
+            print(f"Error al actualizar el quiz: {str(e)}")
             flash(f'Error al actualizar el quiz: {e}', 'danger')
 
     return render_template('instructor/edit_quiz.html', quiz=quiz)
@@ -771,6 +805,16 @@ def take_quiz(quiz_id):
         flash('El contenido seleccionado no es un quiz.', 'danger')
         return redirect(url_for('student_dashboard'))
 
+    # Verificar si el estudiante ya obtuvo una nota mayor o igual a 7
+    existing_response = StudentResponse.query.filter_by(
+        student_id=current_user.id,
+        content_item_id=quiz_id
+    ).filter(StudentResponse.score >= 7).first()
+
+    if existing_response:
+        flash('Ya obtuviste una nota mayor o igual a 7 en este quiz. No puedes intentarlo nuevamente.', 'info')
+        return redirect(url_for('student_dashboard'))
+
     if request.method == 'POST':
         total_questions = len(quiz.questions)
         correct_answers = 0
@@ -814,7 +858,6 @@ def take_quiz(quiz_id):
         return redirect(url_for('student_dashboard'))
 
     return render_template('student/quiz.html', quiz=quiz)
-
 
 
 @app.route('/student/enroll/<int:course_id>', methods=['POST'])

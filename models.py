@@ -38,7 +38,9 @@ class Course(db.Model):
     description = db.Column(db.String(500), nullable=False)
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     modules = db.relationship('Module', back_populates='course', lazy=True, cascade='all, delete-orphan')
-    enrollments = db.relationship('CourseEnrollment', backref='course', lazy=True)
+    enrollments = db.relationship(
+        'CourseEnrollment', back_populates='course', lazy=True, cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
         return f'<Course {self.name}>'
@@ -132,6 +134,7 @@ class CourseEnrollment(db.Model):
     enrollment_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     completed = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Float, default=0.0)
+    course = db.relationship('Course', back_populates='enrollments')
 
     def update_progress(self):
         total_content = sum(len(module.content_items) for module in self.course.modules)
