@@ -705,6 +705,47 @@ def delete_quiz(quiz_id):
 
     return redirect(url_for('list_quizzes', module_id=quiz.module_id))
 
+@app.route('/instructor/course/<int:course_id>/students', methods=['GET'])
+@login_required
+@role_required('instructor')
+def course_students(course_id):
+    """Ver las notas de los estudiantes en un curso específico."""
+    # Verificar que el curso pertenece al instructor actual
+    course = Course.query.get_or_404(course_id)
+    if course.instructor_id != current_user.id:
+        flash('No tienes acceso a este curso.', 'danger')
+        return redirect(url_for('instructor_dashboard'))
+
+    # Obtener los estudiantes inscritos y sus calificaciones en quizzes
+    enrollments = CourseEnrollment.query.filter_by(course_id=course_id).all()
+    students_data = []
+
+    for enrollment in enrollments:
+        student = enrollment.student
+
+        # Obtener quizzes completados por el estudiante
+        completed_quizzes = StudentResponse.query.filter_by(
+            student_id=student.id,
+            completed=True
+        ).join(ContentItem).filter(
+            ContentItem.module.has(course_id=course_id),
+            ContentItem.type == 'quiz'
+        ).all()
+
+        # Preparar datos del estudiante y sus quizzes
+        quizzes = [
+            {'title': quiz.content_item.title, 'score': quiz.score}
+            for quiz in completed_quizzes
+        ]
+
+        students_data.append({
+            'student': student,
+            'quizzes': quizzes
+        })
+
+    return render_template('instructor/course_students.html', course=course, students=students_data)
+
+
 # -------------------- Rutas de Estudiante -------------------- #
 
 @app.route('/student/dashboard')
@@ -858,7 +899,6 @@ def take_quiz(quiz_id):
         return redirect(url_for('student_dashboard'))
 
     return render_template('student/quiz.html', quiz=quiz)
-
 
 @app.route('/student/enroll/<int:course_id>', methods=['POST'])
 @login_required

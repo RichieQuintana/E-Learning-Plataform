@@ -1,0 +1,31 @@
+{% extends "instructor/base_instructor.html" %}
+
+{% block content %}
+<h1>Notas de los Estudiantes: {{ course.name }}</h1>
+<div class="row">
+    {% for student_data in students %}
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ student_data.student.full_name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ student_data.student.email }}</h6>
+
+                {% if student_data.quizzes %}
+                <hr>
+                <h6>Quizzes Completados:</h6>
+                <ul>
+                    {% for quiz in student_data.quizzes %}
+                    <li>
+                        <strong>{{ quiz.title }}</strong>: {{ "%.2f"|format(quiz.score) }}/10
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Este estudiante no ha completado ningún quiz.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
