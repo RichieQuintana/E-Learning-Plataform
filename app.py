@@ -203,32 +203,49 @@ def instructor_dashboard():
         # Variables para cálculo de métricas
         total_scores = 0  # Suma de calificaciones
         total_responses = 0  # Total de respuestas evaluadas
-        completed_responses = 0  # Total de respuestas completadas
+        students_completed_course = 0  # Estudiantes que completaron todos los quizzes
 
-        # Calcular métricas para cada curso
-        for enrollment in course.enrollments:  # Iterar sobre las inscripciones
-            for response in enrollment.student.responses:  # Iterar sobre las respuestas del estudiante
-                # Validar si la respuesta pertenece al curso actual
+        # Total de quizzes en el curso
+        total_quizzes = sum(
+            1 for module in course.modules for content in module.content_items if content.type == 'quiz'
+        )
+
+        # Verificar progreso de cada estudiante
+        for enrollment in course.enrollments:
+            # Número de quizzes completados por el estudiante
+            completed_quizzes = db.session.query(
+                ContentItem.id
+            ).join(StudentResponse).filter(
+                StudentResponse.student_id == enrollment.student_id,
+                StudentResponse.completed == True,
+                ContentItem.module_id.in_([module.id for module in course.modules])
+            ).group_by(ContentItem.id).count()
+            # Aseguramos que no cuente duplicados
+
+            # Si el estudiante completó todos los quizzes del curso, cuenta como completado
+            if total_quizzes > 0 and completed_quizzes == total_quizzes:
+                students_completed_course += 1
+
+            # Calcular promedio de calificaciones
+            for response in enrollment.student.responses:
                 if (
                     response.content_item
                     and response.content_item.module
                     and response.content_item.module.course_id == course.id
                 ):
-                    if response.score is not None:  # Si hay una calificación
+                    if response.score is not None:
                         total_scores += response.score
                         total_responses += 1
-                    if response.completed:  # Si la respuesta está completada
-                        completed_responses += 1
 
-        # Cálculo del promedio de calificaciones (evitar división por 0)
+        # Cálculo del promedio de calificaciones
         average_score = (
             round(total_scores / total_responses, 2) if total_responses > 0 else 0
         )
-        # Cálculo del porcentaje de finalización (evitar división por 0)
-        total_content = course.get_total_content()  # Total de ítems de contenido
+
+        # Cálculo del porcentaje de finalización
         completion_rate = (
-            round((completed_responses / total_content) * 100, 2)
-            if total_content > 0 else 0
+            round((students_completed_course / total_students) * 100, 2)
+            if total_students > 0 else 0
         )
 
         # Agregar métricas a la lista
