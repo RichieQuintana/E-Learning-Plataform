@@ -259,7 +259,11 @@ def instructor_dashboard():
     # Ordenar cursos por número de estudiantes, promedio de notas y porcentaje de finalización
     sorted_courses = sorted(
         course_metrics,
-        key=lambda x: (x['total_students'], x['average_score'], x['completion_rate']),
+        key=lambda x: (
+            0.4 * x['total_students'] +
+            0.4 * x['average_score'] +
+            0.2 * x['completion_rate']
+        ),
         reverse=True
     )
 
