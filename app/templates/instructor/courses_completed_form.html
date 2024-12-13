@@ -1,0 +1,15 @@
+{% extends 'instructor/base_instructor.html' %}
+
+{% block content %}
+<h1>Cursos Completados</h1>
+<p>Consulta los cursos completados por tus estudiantes en un rango de fechas.</p>
+<form method="POST" action="{{ url_for('instructor_courses_completed') }}">
+    <label for="start_date">Fecha de inicio:</label>
+    <input type="date" id="start_date" name="start_date" required>
+    <br>
+    <label for="end_date">Fecha de fin:</label>
+    <input type="date" id="end_date" name="end_date" required>
+    <br>
+    <button type="submit">Buscar</button>
+</form>
+{% endblock %}

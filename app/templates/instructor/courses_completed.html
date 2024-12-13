@@ -1,0 +1,32 @@
+{% extends 'instructor/base_instructor.html' %}
+
+{% block content %}
+<h1>Cursos Completados entre {{ start_date }} y {{ end_date }}</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nombre del Curso</th>
+            <th>Módulo</th>
+            <th>ID del Estudiante</th>
+            <th>Fecha de Finalización</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for course_data in courses %}
+        <tr>
+            <td rowspan="{{ course_data.modules_data|length }}">{{ course_data.course.name }}</td>
+            {% for module in course_data.modules_data %}
+            <tr>
+                <td>{{ module.module_title }}</td>
+                <td>{{ module.student_id }}</td>
+                <td>{{ module.completion_date }}</td>
+            </tr>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('instructor_courses_completed') }}">Hacer otra búsqueda</a>
+{% endblock %}

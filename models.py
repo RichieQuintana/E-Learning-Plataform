@@ -55,7 +55,6 @@ class Course(db.Model):
             total_content += len(module.content_items)
         return total_content
 
-
 # Modelo de Módulo
 class Module(db.Model):
     __tablename__ = 'modules'
@@ -63,7 +62,7 @@ class Module(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     order = db.Column(db.Integer, nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete="CASCADE"), nullable=False)
     content_items = db.relationship('ContentItem', back_populates='module', lazy=True, cascade='all, delete-orphan')
     course = db.relationship('Course', back_populates='modules')
 
@@ -87,7 +86,7 @@ class ContentItem(db.Model):
     content = db.Column(db.Text, nullable=True)
     file_path = db.Column(db.String(255), nullable=True)
     order = db.Column(db.Integer, nullable=False)
-    module_id = db.Column(db.Integer, db.ForeignKey('modules.id'), nullable=False)
+    module_id = db.Column(db.Integer, db.ForeignKey('modules.id', ondelete="CASCADE"), nullable=False)
     questions = db.relationship('QuizQuestion', backref='content_item', cascade='all, delete-orphan', lazy=True)
     module = db.relationship('Module', back_populates='content_items')
 
@@ -99,7 +98,7 @@ class QuizQuestion(db.Model):
     __tablename__ = 'quiz_questions'
     id = db.Column(db.Integer, primary_key=True)
     question_text = db.Column(db.Text, nullable=False)
-    content_item_id = db.Column(db.Integer, db.ForeignKey('content_items.id'), nullable=False)
+    content_item_id = db.Column(db.Integer, db.ForeignKey('content_items.id', ondelete="CASCADE"), nullable=False)
     question_type = db.Column(db.String(50), default="multiple_choice")
     correct_answer = db.Column(db.Text, nullable=True)
     options = db.Column(db.Text, nullable=True)
@@ -129,25 +128,30 @@ class QuizQuestion(db.Model):
 class CourseEnrollment(db.Model):
     __tablename__ = 'course_enrollments'
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete="CASCADE"), nullable=False)
     enrollment_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     completed = db.Column(db.Boolean, default=False)
     progress = db.Column(db.Float, default=0.0)
+    completion_date = db.Column(db.DateTime, nullable=True)  # Nueva columna
     course = db.relationship('Course', back_populates='enrollments')
 
     def update_progress(self):
         total_content = sum(len(module.content_items) for module in self.course.modules)
-        completed_content = StudentResponse.query.filter_by(student_id=self.student_id, completed=True).count()
+        completed_content = StudentResponse.query.filter_by(student_id=self.student_id, completed=True).filter(
+            StudentResponse.content_item_id.in_([content.id for module in self.course.modules for content in module.content_items])
+        ).count()
         self.progress = (completed_content / total_content) * 100 if total_content > 0 else 0
-        self.completed = self.progress == 100
+        if self.progress == 100:
+            self.completed = True
+            self.completion_date = datetime.utcnow()  # Actualizar la fecha de finalización
         db.session.commit()
 
 # Modelo de Respuestas de Estudiantes
 class StudentResponse(db.Model):
     __tablename__ = 'student_responses'
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     content_item_id = db.Column(db.Integer, db.ForeignKey('content_items.id', ondelete="CASCADE"), nullable=False)
     response = db.Column(db.Text, nullable=True)
     score = db.Column(db.Float, nullable=True)
@@ -156,9 +160,23 @@ class StudentResponse(db.Model):
     content_item = db.relationship('ContentItem', backref='responses')
 
     def mark_as_completed(self):
+        """Marca el contenido como completado y actualiza el progreso del módulo y curso."""
         self.completed = True
         self.completion_date = datetime.utcnow()
         db.session.commit()
-        enrollment = CourseEnrollment.query.filter_by(student_id=self.student_id, course_id=self.content_item.module.course.id).first()
-        if enrollment:
-            enrollment.update_progress()
+
+        # Verificar si todos los contenidos del módulo están completados por el estudiante
+        module_contents = self.content_item.module.content_items
+        completed_contents = StudentResponse.query.filter_by(
+            student_id=self.student_id, completed=True
+        ).filter(
+            StudentResponse.content_item_id.in_([item.id for item in module_contents])
+        ).count()
+
+        if completed_contents == len(module_contents):  # Todos los contenidos están completados
+            enrollment = CourseEnrollment.query.filter_by(
+                student_id=self.student_id,
+                course_id=self.content_item.module.course.id
+            ).first()
+            if enrollment:
+                enrollment.update_progress()

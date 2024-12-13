@@ -6,7 +6,7 @@ from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 from models import db, User, Role, Course, Module, ContentItem, CourseEnrollment, StudentResponse, QuizQuestion
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from forms import DeleteUserForm
 from urllib.parse import urlparse, parse_qs
@@ -127,7 +127,14 @@ def logout():
 @login_required
 @role_required('admin')
 def admin_dashboard():
-    return render_template('admin/admin_dashboard.html')
+    total_users = User.query.count()
+    total_courses = Course.query.count()
+    recent_users = User.query.order_by(User.id.desc()).limit(5).all()
+    recent_courses = Course.query.order_by(Course.id.desc()).limit(5).all()
+    return render_template('admin/admin_dashboard.html',
+        total_users=total_users,
+        total_courses=total_courses,         recent_users=recent_users,
+        recent_courses=recent_courses)
 
 @app.route('/admin/register_user', methods=['GET', 'POST'])
 @login_required
@@ -164,6 +171,14 @@ def view_users():
 def manage_courses():
     courses = Course.query.all()  # Obtén todos los cursos
     return render_template('admin/manage_courses.html', courses=courses)
+
+@app.route('/admin/course/<int:course_id>', methods=['GET'])
+@login_required
+@role_required('admin')  # Si usas decoradores de roles
+def view_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    return render_template('admin/view_course.html', course=course)
+
 
 @app.route('/admin/user/delete/<int:user_id>', methods=['POST'])
 @login_required
@@ -274,7 +289,6 @@ def instructor_dashboard():
         course_metrics=sorted_courses
     )
 
-
 @app.route('/instructor/courses', methods=['GET'])
 @login_required
 @role_required('instructor')
@@ -329,20 +343,33 @@ def edit_course(course_id):
 
 
 # Eliminar un curso
+# Eliminar un curso
 @app.route('/instructor/course/delete/<int:course_id>', methods=['POST'])
 @login_required
 @role_required('instructor')
 def delete_course(course_id):
-    """Eliminar un curso."""
+    """Eliminar un curso junto con sus módulos y respuestas asociadas."""
     course = Course.query.get_or_404(course_id)
     if course.instructor_id != current_user.id:
         flash('No tienes permiso para eliminar este curso.', 'danger')
         return redirect(url_for('instructor_dashboard'))
 
-    db.session.delete(course)
-    db.session.commit()
-    flash('Curso eliminado exitosamente.', 'success')
+    try:
+        # Eliminar respuestas de estudiantes asociadas a los contenidos del curso
+        for module in course.modules:
+            for content_item in module.content_items:
+                StudentResponse.query.filter_by(content_item_id=content_item.id).delete()
+
+        # Eliminar el curso (esto elimina automáticamente módulos y contenidos debido a la cascada)
+        db.session.delete(course)
+        db.session.commit()
+        flash('Curso eliminado exitosamente.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar el curso: {e}', 'danger')
+
     return redirect(url_for('instructor_dashboard'))
+
 
 # Ver detalles de un curso
 @app.route('/instructor/course/<int:course_id>', methods=['GET'])
@@ -445,6 +472,113 @@ def delete_module(module_id):
     flash('Módulo eliminado exitosamente.', 'success')
     return redirect(url_for('course_details', course_id=module.course_id))
 
+@app.route('/instructor/courses/completed', methods=['GET', 'POST'])
+@login_required
+@role_required('instructor')
+def instructor_courses_completed():
+    if request.method == 'POST':
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+
+        # Validate dates
+        if not start_date or not end_date:
+            flash('Please provide both start and end dates.', 'danger')
+            return redirect(url_for('instructor_courses_completed'))
+
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('instructor_courses_completed'))
+
+        # Query completed courses
+        completed_courses = Course.query.join(CourseEnrollment).filter(
+            Course.instructor_id == current_user.id,
+            CourseEnrollment.completed == True,
+            CourseEnrollment.completion_date.between(start_date, end_date)
+        ).all()
+
+        courses_with_modules = []
+        for course in completed_courses:
+            modules_data = []
+            for module in course.modules:
+                module_responses = StudentResponse.query.filter(
+                    StudentResponse.content_item_id.in_([item.id for item in module.content_items]),
+                    StudentResponse.completed == True
+                ).all()
+                for response in module_responses:
+                    modules_data.append({
+                        'module_title': module.title,
+                        'student_id': response.student_id,
+                        'completion_date': response.completion_date
+                    })
+            courses_with_modules.append({
+                'course': course,
+                'modules_data': modules_data
+            })
+
+        return render_template(
+            'instructor/courses_completed.html',
+            courses=courses_with_modules,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    return render_template('instructor/courses_completed_form.html')
+
+@app.route('/instructor/modules/completed', methods=['GET', 'POST'])
+@login_required
+@role_required('instructor')
+def instructor_modules_completed():
+    if request.method == 'POST':
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+
+        # Validate dates
+        if not start_date or not end_date:
+            flash('Please provide both start and end dates.', 'danger')
+            return redirect(url_for('instructor_modules_completed'))
+
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('instructor_modules_completed'))
+
+        # Get completed modules within the date range
+        completed_modules = []
+        for module in Module.query.all():
+            # Check if all content items in the module are completed
+            module_content_ids = [item.id for item in module.content_items]
+            total_content = len(module_content_ids)
+            completed_content = StudentResponse.query.filter(
+                StudentResponse.content_item_id.in_(module_content_ids),
+                StudentResponse.completed == True
+            ).distinct(StudentResponse.content_item_id).count()
+
+            if total_content > 0 and completed_content == total_content:
+                last_completion_date = StudentResponse.query.filter(
+                    StudentResponse.content_item_id.in_(module_content_ids),
+                    StudentResponse.completed == True
+                ).order_by(StudentResponse.completion_date.desc()).first().completion_date
+
+                # Add the module to the list if within the date range
+                if start_date <= last_completion_date <= end_date:
+                    completed_modules.append({
+                        'module': module,
+                        'completion_date': last_completion_date
+                    })
+
+        return render_template(
+            'instructor/modules_completed.html',
+            modules=completed_modules,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    return render_template('instructor/modules_completed_form.html')
 
 # Añadir contenido a un módulo
 @app.route('/instructor/module/<int:module_id>/content/new', methods=['GET', 'POST'])
@@ -965,6 +1099,24 @@ def loads_filter(value):
         return json.loads(value)
     except (TypeError, ValueError):
         return {}
+
+with app.app_context():
+    enrollments = CourseEnrollment.query.all()
+    for enrollment in enrollments:
+        # Recalcular progreso y marcar como completado si corresponde
+        total_content = sum(len(module.content_items) for module in enrollment.course.modules)
+        completed_content = StudentResponse.query.filter_by(student_id=enrollment.student_id, completed=True).count()
+        enrollment.progress = (completed_content / total_content) * 100 if total_content > 0 else 0
+
+        if enrollment.progress == 100:
+            enrollment.completed = True
+            enrollment.completion_date = datetime.utcnow()  # Establecer fecha actual como finalización
+        else:
+            enrollment.completed = False
+            enrollment.completion_date = None
+        db.session.commit()
+
+    print("Datos existentes actualizados correctamente.")
 
 if __name__ == '__main__':
     app.run(debug=True)

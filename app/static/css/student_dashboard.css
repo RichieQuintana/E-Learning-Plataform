@@ -1,0 +1,57 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  color: #0073e6;
+}
+
+nav {
+  display: flex;
+  background-color: #0073e6;
+  color: white;
+  padding: 10px;
+  justify-content: space-between;
+}
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+ul li {
+  font-size: 18px;
+  margin: 10px 0;
+}
+ul li i {
+  margin-right: 8px;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 15px;
+  color: white;
+  background-color: #0073e6;
+  border-radius: 5px;
+  text-decoration: none;
+}
+.button:hover {
+  background-color: rgb(0, 89.5, 179);
+}
+
+/*# sourceMappingURL=student_dashboard.css.map */

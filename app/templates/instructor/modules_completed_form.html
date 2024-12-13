@@ -1,0 +1,15 @@
+{% extends 'instructor/base_instructor.html' %}
+
+{% block content %}
+<h1>Search Completed Modules</h1>
+<p>Filter completed modules within a specific date range.</p>
+<form method="POST" action="{{ url_for('instructor_modules_completed') }}">
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" name="start_date" required>
+    <br>
+    <label for="end_date">End Date:</label>
+    <input type="date" id="end_date" name="end_date" required>
+    <br>
+    <button type="submit">Search</button>
+</form>
+{% endblock %}
