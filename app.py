@@ -1118,5 +1118,19 @@ with app.app_context():
 
     print("Datos existentes actualizados correctamente.")
 
+def update_completion_dates():
+    # Obtener todas las inscripciones con progreso al 100% pero sin fecha de finalización
+    enrollments = CourseEnrollment.query.filter_by(completed=True, completion_date=None).all()
+    
+    for enrollment in enrollments:
+        # Calcular la fecha más reciente en las respuestas del estudiante
+        student_responses = StudentResponse.query.filter_by(student_id=enrollment.student_id).all()
+        if student_responses:
+            latest_completion_date = max([response.completion_date for response in student_responses if response.completed])
+            enrollment.completion_date = latest_completion_date or datetime.utcnow()
+            db.session.add(enrollment)
+        db.session.commit()
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,32 +1,40 @@
 {% extends 'instructor/base_instructor.html' %}
 
 {% block content %}
-<h1>Cursos Completados entre {{ start_date }} y {{ end_date }}</h1>
-
-<table>
-    <thead>
-        <tr>
-            <th>Nombre del Curso</th>
-            <th>Módulo</th>
-            <th>ID del Estudiante</th>
-            <th>Fecha de Finalización</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for course_data in courses %}
-        <tr>
-            <td rowspan="{{ course_data.modules_data|length }}">{{ course_data.course.name }}</td>
-            {% for module in course_data.modules_data %}
-            <tr>
-                <td>{{ module.module_title }}</td>
-                <td>{{ module.student_id }}</td>
-                <td>{{ module.completion_date }}</td>
-            </tr>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<a href="{{ url_for('instructor_courses_completed') }}">Hacer otra búsqueda</a>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Cursos Completados</h1>
+    <p class="text-center">
+        <strong>Rango de Fechas:</strong> {{ start_date }} a {{ end_date }}
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Nombre del Curso</th>
+                    <th>Módulo</th>
+                    <th>ID del Estudiante</th>
+                    <th>Fecha de Finalización</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course_data in courses %}
+                    <tr>
+                        <td rowspan="{{ course_data.modules_data|length }}" class="align-middle text-center">
+                            {{ course_data.course.name }}
+                        </td>
+                        {% for module in course_data.modules_data %}
+                            <td class="text-center">{{ module.module_title }}</td>
+                            <td class="text-center">{{ module.student_id }}</td>
+                            <td class="text-center">{{ module.completion_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('instructor_courses_completed') }}" class="btn btn-primary">Hacer otra búsqueda</a>
+    </div>
+</div>
 {% endblock %}
